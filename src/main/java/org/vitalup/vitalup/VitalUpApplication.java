@@ -1,0 +1,13 @@
+package org.vitalup.vitalup;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class VitalUpApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(VitalUpApplication.class, args);
+    }
+
+}

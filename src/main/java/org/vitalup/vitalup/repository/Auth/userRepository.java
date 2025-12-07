@@ -1,14 +1,11 @@
 package org.vitalup.vitalup.repository.Auth;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.vitalup.vitalup.entities.Auth.Users;
 
 import java.util.Optional;
-import java.util.UUID;
 
-@Repository
-public interface userRepository extends JpaRepository<Users, UUID> {
+public interface userRepository extends MongoRepository<Users, String> {
 
     Optional<Users> findByEmail(String email);
 

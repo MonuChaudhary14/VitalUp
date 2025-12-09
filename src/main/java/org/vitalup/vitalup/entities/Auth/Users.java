@@ -37,6 +37,10 @@ public class Users implements UserDetails {
 
     private String refreshToken;
 
+    private Boolean locked = false;
+    private Boolean enabled = false;
+    private Boolean isVerifiedRegistration = false;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

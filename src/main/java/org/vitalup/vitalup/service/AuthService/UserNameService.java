@@ -72,5 +72,17 @@ public class UserNameService{
         return expiration.before(new Date());
     }
 
+    public String generateRegistrationToken(String email){
+        long nowMillis = System.currentTimeMillis();
+        long expMillis = nowMillis + 1000L * 60 * 5;
+
+        return Jwts.builder()
+                .claim("sub", email)
+                .claim("purpose", "registration_session")
+                .claim("iat", nowMillis / 1000L)
+                .claim("exp", expMillis / 1000L)
+                .signWith(getSigningKey())
+                .compact();
+    }
 
 }

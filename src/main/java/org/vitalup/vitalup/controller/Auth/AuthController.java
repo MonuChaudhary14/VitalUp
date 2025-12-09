@@ -8,8 +8,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.vitalup.vitalup.dto.ApiResponse;
+import org.vitalup.vitalup.dto.Auth.ForgotPassword.ForgotPasswordRespond;
+import org.vitalup.vitalup.dto.Auth.ForgotPassword.ValidateForgotOtpRequest;
 import org.vitalup.vitalup.dto.Auth.Login.LoginDTO;
 import org.vitalup.vitalup.dto.Auth.Login.LoginResponseDTO;
+import org.vitalup.vitalup.dto.Auth.Registration.RegistrationOtpDTO;
 import org.vitalup.vitalup.dto.Auth.Registration.RegistrationRequestDTO;
 import org.vitalup.vitalup.service.AuthService.AuthInterface;
 
@@ -26,14 +29,29 @@ public class AuthController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-//    @PostMapping("/registration")
-//    public ResponseEntity<ApiResponse<?>> registration(@Valid @RequestBody RegistrationRequestDTO request){
-//        ApiResponse<?> response = authService.registration(request);
-//        return ResponseEntity.status(response.getStatus()).body(response);
-//    }
+    @PostMapping("/registration")
+    public ResponseEntity<ApiResponse<String>> registration(@Valid @RequestBody RegistrationRequestDTO request){
+        ApiResponse<String> response = authService.registration(request);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 
+    @PostMapping("/validateRegistration")
+    public ResponseEntity<ApiResponse<?>> validateRegistrationOTP(@RequestBody RegistrationOtpDTO request){
+        ApiResponse<?> response = authService.validateRegistrationOtp(request);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 
+    @PostMapping("/forgotPassword")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody String email){
+        ApiResponse<String> response = authService.forgotPassword(email);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 
+    @PostMapping("validateForgotPassword")
+    public ResponseEntity<ApiResponse<ForgotPasswordRespond>> validateForgotOtp(@RequestBody ValidateForgotOtpRequest request) {
+        ApiResponse<ForgotPasswordRespond> response = authService.validateForgotOtp(request);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 
 
 }

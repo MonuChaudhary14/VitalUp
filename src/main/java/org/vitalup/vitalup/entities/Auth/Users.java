@@ -35,6 +35,8 @@ public class Users implements UserDetails {
 
     private int passwordVersion;
 
+    private String refreshToken;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

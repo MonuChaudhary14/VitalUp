@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.vitalup.vitalup.dto.ApiResponse;
 import org.vitalup.vitalup.dto.Auth.Login.LoginDTO;
 import org.vitalup.vitalup.dto.Auth.Login.LoginResponseDTO;
+import org.vitalup.vitalup.dto.Auth.Registration.RegistrationRequestDTO;
 import org.vitalup.vitalup.entities.Auth.Users;
 import org.vitalup.vitalup.repository.Auth.userRepository;
 import org.vitalup.vitalup.security.EmailValidator;
@@ -26,7 +27,7 @@ public class auth implements AuthInterface {
 
         String rawEmail = request.getEmail();
         String rawPassword = request.getPassword();
-        String email = normaliseEmail(rawEmail);
+        String email = validator.normaliseEmail(rawEmail);
 
         Users user;
 
@@ -54,13 +55,37 @@ public class auth implements AuthInterface {
         return new ApiResponse<>(200, "Logged in successfully", token);
     }
 
-    private String normaliseEmail(String email){
-        if(email == null) return "PLease enter the email";
-        else return email.trim().toLowerCase();
-    }
+//    public ApiResponse<String> registration(RegistrationRequestDTO request){
+//
+//        if(request == null || request.getEmail() == null || request.getPassword() == null || request.getUsername() == null){
+//            return new ApiResponse<>(400, "Some fields are missing", null);
+//        }
+//
+//        try{
+//            String email = validator.normaliseEmail(request.getEmail());
+//
+//            if (!validator.checkEmail(email)){
+//                throw new IllegalArgumentException("Invalid email format");
+//            }
+//
+//            if (existsByEmail(email)){
+//                throw new IllegalArgumentException("User with this email already exists");
+//            }
+//        }
+//        catch(IllegalArgumentException e){
+//            return new ApiResponse<>(400, e.getMessage(), null);
+//        }
+//
+//
+//
+//    }
 
     private Users getUserByEmail(String email){
         return userRepo.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User does not found"));
+    }
+
+    private boolean existsByEmail(String email) {
+        return userRepo.existsByEmail(email);
     }
 
     private LoginResponseDTO generateTokensOrNull(Users user) {

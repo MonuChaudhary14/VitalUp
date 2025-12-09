@@ -13,4 +13,9 @@ public class EmailValidator {
         return EMAIL_PATTERN.matcher(email).matches();
     }
 
+    public String normaliseEmail(String email){
+        if(email == null) return "PLease enter the email";
+        else return email.trim().toLowerCase();
+    }
+
 }

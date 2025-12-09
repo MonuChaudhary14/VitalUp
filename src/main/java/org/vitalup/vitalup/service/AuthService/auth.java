@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Service
 @RequiredArgsConstructor
-public class auth implements AuthInterface{
+public class auth implements AuthInterface {
 
     private final EmailValidator validator;
     private final userRepository userRepo;

@@ -1,33 +1,42 @@
 package org.vitalup.vitalup.entities.Auth;
 
+import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 
-@Document(collection = "users")
 @NoArgsConstructor
 @Data
-
+@Entity
+@Table(name = "users")
+@EqualsAndHashCode
 public class Users implements UserDetails {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
-    @Indexed(unique = true)
+    @Column(unique = true)
     private String email;
+
     private String password;
     private UserRole userRole;
 
+    @Column(unique = true)
+    private String username;
+
     private int passwordVersion;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -36,7 +45,7 @@ public class Users implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return username;
     }
 
     @Override
@@ -50,5 +59,16 @@ public class Users implements UserDetails {
 
     @Override
     public boolean isEnabled() { return true; }
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
 }

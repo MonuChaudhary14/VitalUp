@@ -10,6 +10,7 @@ import org.vitalup.vitalup.dto.Auth.Registration.RegistrationOtpDTO;
 import org.vitalup.vitalup.dto.Auth.Registration.RegistrationRequestDTO;
 import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendForgotOtpRequest;
 import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendOtpDTO;
+import org.vitalup.vitalup.dto.Auth.ResetPassword.ResetPasswordRequest;
 
 public interface AuthInterface {
 
@@ -26,4 +27,7 @@ public interface AuthInterface {
     ApiResponse<String> resendOTP(@RequestBody ResendOtpDTO request);
 
     ApiResponse<String> resendForgotPasswordOtp(ResendForgotOtpRequest request);
+
+    ApiResponse<String> resetPassword(ResetPasswordRequest request);
+
 }

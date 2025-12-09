@@ -16,6 +16,7 @@ import org.vitalup.vitalup.dto.Auth.Registration.RegistrationOtpDTO;
 import org.vitalup.vitalup.dto.Auth.Registration.RegistrationRequestDTO;
 import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendForgotOtpRequest;
 import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendOtpDTO;
+import org.vitalup.vitalup.dto.Auth.ResetPassword.ResetPasswordRequest;
 import org.vitalup.vitalup.service.AuthService.AuthInterface;
 
 @RestController
@@ -64,6 +65,12 @@ public class AuthController {
     @PostMapping("/resendForgotOtp")
     public ResponseEntity<ApiResponse<String>> resendForgotPasswordOtp(@RequestBody ResendForgotOtpRequest request) {
         ApiResponse<String> response = authService.resendForgotPasswordOtp(request);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PostMapping("/resetpassword")
+    public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody ResetPasswordRequest request) {
+        ApiResponse<String> response = authService.resetPassword(request);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

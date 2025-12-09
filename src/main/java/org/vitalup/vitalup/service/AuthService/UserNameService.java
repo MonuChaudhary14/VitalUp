@@ -17,7 +17,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class UserNameService{
 
-    @Value("${SECRET_KEY}")
+    @Value("${app.jwt.secret}")
     private String secretKey;
 
     private SecretKey getSigningKey(){

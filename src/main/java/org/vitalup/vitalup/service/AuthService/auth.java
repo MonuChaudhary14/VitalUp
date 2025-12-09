@@ -1,11 +1,8 @@
 package org.vitalup.vitalup.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.vitalup.vitalup.dto.ApiResponse;
 import org.vitalup.vitalup.dto.Auth.ForgotPassword.ForgotPasswordRespond;
 import org.vitalup.vitalup.dto.Auth.ForgotPassword.ValidateForgotOtpRequest;
@@ -15,6 +12,7 @@ import org.vitalup.vitalup.dto.Auth.Registration.RegistrationOtpDTO;
 import org.vitalup.vitalup.dto.Auth.Registration.RegistrationRequestDTO;
 import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendForgotOtpRequest;
 import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendOtpDTO;
+import org.vitalup.vitalup.dto.Auth.ResetPassword.ResetPasswordRequest;
 import org.vitalup.vitalup.entities.Auth.UserRole;
 import org.vitalup.vitalup.entities.Auth.Users;
 import org.vitalup.vitalup.entities.OTP.OtpType;
@@ -277,7 +275,7 @@ public class auth implements AuthInterface {
         }
 
         String tempToken = usernameService.generateToken(user);
-        redisService.saveValue("TEMP_RESET_" + email, tempToken, TEMP_TOKEN_EXPIRE);
+        redisService.saveValue("TEMP_RESET_" + tempToken, email, TEMP_TOKEN_EXPIRE);
         ForgotPasswordRespond tokenResponse = new ForgotPasswordRespond(tempToken);
 
         return new ApiResponse<>(200, "OTP validated successfully", tokenResponse);
@@ -363,6 +361,40 @@ public class auth implements AuthInterface {
             return new ApiResponse<>(429, e.getMessage(), null);
         }
 
+    }
+
+    public ApiResponse<String> resetPassword(ResetPasswordRequest request){
+
+        if (request.getToken() == null || request.getNewPassword() == null) {
+            return new ApiResponse<>(400, "Check your fields", null);
+        }
+
+        String tempToken = request.getToken();
+        String newPassword = request.getNewPassword();
+
+        String email = redisService.getValue("TEMP_RESET_" + tempToken);
+        if (email == null) {
+            return new ApiResponse<>(401, "Invalid or expired reset token.", null);
+        }
+
+        Users user;
+        try{
+            user = getUserByEmail(email);
+        }
+        catch(Exception e){
+            return new ApiResponse<>(400, "User not found", null);
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        int currentVersion = user.getPasswordVersion();
+        user.setPasswordVersion(currentVersion + 1);
+
+        userRepo.save(user);
+
+        redisService.deleteValue("TEMP_RESET_" + tempToken);
+
+        return new ApiResponse<>(200, "Password has been reset successfully.", null);
     }
 
     // Methods

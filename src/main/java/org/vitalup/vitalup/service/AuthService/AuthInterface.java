@@ -1,5 +1,6 @@
 package org.vitalup.vitalup.service.AuthService;
 
+import org.springframework.web.bind.annotation.RequestBody;
 import org.vitalup.vitalup.dto.ApiResponse;
 import org.vitalup.vitalup.dto.Auth.ForgotPassword.ForgotPasswordRespond;
 import org.vitalup.vitalup.dto.Auth.ForgotPassword.ValidateForgotOtpRequest;
@@ -7,6 +8,8 @@ import org.vitalup.vitalup.dto.Auth.Login.LoginDTO;
 import org.vitalup.vitalup.dto.Auth.Login.LoginResponseDTO;
 import org.vitalup.vitalup.dto.Auth.Registration.RegistrationOtpDTO;
 import org.vitalup.vitalup.dto.Auth.Registration.RegistrationRequestDTO;
+import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendForgotOtpRequest;
+import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendOtpDTO;
 
 public interface AuthInterface {
 
@@ -20,4 +23,7 @@ public interface AuthInterface {
 
     ApiResponse<ForgotPasswordRespond> validateForgotOtp(ValidateForgotOtpRequest request);
 
+    ApiResponse<String> resendOTP(@RequestBody ResendOtpDTO request);
+
+    ApiResponse<String> resendForgotPasswordOtp(ResendForgotOtpRequest request);
 }

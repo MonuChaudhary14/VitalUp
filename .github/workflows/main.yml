@@ -35,7 +35,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vitalup-jar
-          path: target/VitalUp-0.0.1-SNAPSHOT.jar
+          path: target/VitalUp.jar
 
   deploy:
     name: Deploy to EC2

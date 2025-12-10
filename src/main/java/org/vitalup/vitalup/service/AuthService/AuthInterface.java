@@ -24,7 +24,7 @@ public interface AuthInterface {
 
     ApiResponse<ForgotPasswordRespond> validateForgotOtp(ValidateForgotOtpRequest request);
 
-    ApiResponse<String> resendOTP(@RequestBody ResendOtpDTO request);
+    ApiResponse<String> resendOTP(ResendOtpDTO request);
 
     ApiResponse<String> resendForgotPasswordOtp(ResendForgotOtpRequest request);
 

@@ -17,7 +17,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class UserNameService{
 
-    @Value("${app.jwt.secret}")
+    @Value("${SECRET_KEY}")
     private String secretKey;
 
     private SecretKey getSigningKey(){
@@ -34,9 +34,7 @@ public class UserNameService{
 
         if (userDetails instanceof Users) {
             Integer version = ((Users) userDetails).getPasswordVersion();
-            if (version != null) {
-                passwordVersion = version;
-            }
+            passwordVersion = version;
         }
 
         return Jwts.builder()

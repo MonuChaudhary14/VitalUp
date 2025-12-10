@@ -28,6 +28,8 @@ public class Users implements UserDetails {
     private String email;
 
     private String password;
+
+    @Enumerated(EnumType.STRING)
     private UserRole userRole;
 
     @Column(unique = true)
@@ -36,6 +38,7 @@ public class Users implements UserDetails {
     private int passwordVersion;
 
     private String refreshToken;
+    private LocalDateTime refreshTokenExpiry;
 
     private Boolean locked = false;
     private Boolean enabled = false;

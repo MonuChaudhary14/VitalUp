@@ -1,5 +1,6 @@
 package org.vitalup.vitalup.configuration;
 
+import jakarta.annotation.Nonnull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -20,7 +21,7 @@ public class AppConfig {
         return new AuthenticationProvider(){
 
             @Override
-            public Authentication authenticate(Authentication authentication) throws AuthenticationException{
+            public Authentication authenticate(@Nonnull Authentication authentication) throws AuthenticationException{
                 String username = authentication.getName();
                 String password = String.valueOf(authentication.getCredentials());
 

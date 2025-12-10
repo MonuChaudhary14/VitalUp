@@ -19,12 +19,16 @@ import org.vitalup.vitalup.entities.OTP.OtpType;
 import org.vitalup.vitalup.repository.Auth.userRepository;
 import org.vitalup.vitalup.security.EmailValidator;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.vitalup.vitalup.security.UsernameValidator;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
 public class auth implements AuthInterface {
 
     private final EmailValidator validator;
+    private final UsernameValidator usernameValidator;
     private final userRepository userRepo;
     private final VerificationService verificationService;
     private final OTPService otpService;
@@ -36,31 +40,50 @@ public class auth implements AuthInterface {
 
     public ApiResponse<LoginResponseDTO> login(LoginDTO request){
 
-        if(request == null || request.getEmail() == null || request.getPassword() == null){
+        if(request == null || request.getUsername() == null || request.getPassword() == null){
             return new ApiResponse<>(400, "PLease check all the fields", null);
         }
 
-        String rawEmail = request.getEmail();
+        String rawUsername  = request.getUsername();
         String rawPassword = request.getPassword();
-        String email = validator.normaliseEmail(rawEmail);
 
-        Users user;
+        Users user = null;
 
         try{
-            if(!validator.checkEmail(email)){
-                user = getUserByEmail(email);
+            if(usernameValidator.checkUsername(rawUsername)){
+                user = getUserByUsername(rawUsername);
             }
             else{
-                return new ApiResponse<>(400, "Invalid email");
+                return new ApiResponse<>(400, "Invalid username format", null);
             }
         }
         catch(UsernameNotFoundException e){
             return new ApiResponse<>(400, "User not found", null);
         }
 
+        if (!Boolean.TRUE.equals(user.getEnabled())) {
+            return new ApiResponse<>(403, "Account not enabled. Please verify your OTP first.",
+                    null);
+        }
+
         if (!verificationService.checkCredentials(user, request.getPassword())) {
             return new ApiResponse<>(401, "Invalid credentials", null);
         }
+
+//        if (isRefreshTokenExpired(user)){
+//
+//            LoginResponseDTO newToken = generateTokensOrNull(user);
+//
+//            if (newToken == null){
+//                return new ApiResponse<>(500, "Failed to generate tokens", null);
+//            }
+//
+//            user.setRefreshToken(newToken.getRefreshToken());
+//            user.setRefreshTokenExpiry(LocalDateTime.now().plusDays(7));  // 7 days, example
+//            userRepository.save(user);
+//
+//            return new ApiResponse<>(200, "Logged in successfully (new refresh token issued)", newToken);
+//        }
 
         LoginResponseDTO token = generateTokensOrNull(user);
         if (token == null) {
@@ -463,6 +486,16 @@ public class auth implements AuthInterface {
         } catch (Exception ignored) {
             return false;
         }
+    }
+
+    private Users getUserByUsername(String userName){
+        return userRepo.findByUsernameIgnoreCase(userName).orElseThrow(() -> new UsernameNotFoundException("User does not found"));
+    }
+
+    private boolean isRefreshTokenExpired(Users user){
+        return user.getRefreshToken() == null ||
+                user.getRefreshTokenExpiry() == null ||
+                LocalDateTime.now().isAfter(user.getRefreshTokenExpiry());
     }
 
 }

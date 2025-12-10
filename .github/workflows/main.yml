@@ -53,7 +53,14 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          if [ -z "${{ secrets.EC2_HOST }}" ]; then
+            echo "ERROR: EC2_HOST secret not set!"
+            exit 1
+          fi
+          echo "Adding EC2 host to known_hosts..."
+          ssh-keyscan -T 10 -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          echo "SSH config complete."
+
 
       - name: Test SSH connection
         run: |

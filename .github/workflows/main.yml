@@ -70,7 +70,7 @@ jobs:
       - name: Copy JAR to EC2
         run: |
           echo "Copying JAR to EC2..."
-          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no VitalUp-0.0.1-SNAPSHOT.jar ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/vitalup/VitalUp.jar
+          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no VitalUp.jar ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/vitalup/VitalUp.jar
 
       - name: Restart VitalUp service
         run: |

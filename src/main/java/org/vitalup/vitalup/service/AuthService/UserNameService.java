@@ -1,4 +1,5 @@
 package org.vitalup.vitalup.service.AuthService;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -15,72 +16,71 @@ import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
-public class UserNameService{
+public class UserNameService {
 
-    @Value("${SECRET_KEY}")
-    private String secretKey;
+	@Value("${SECRET_KEY}")
+	private String secretKey;
 
-    private SecretKey getSigningKey(){
-        byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
+	private SecretKey getSigningKey() {
+		byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+		return Keys.hmacShaKeyFor(keyBytes);
+	}
 
-    public String generateToken(UserDetails userDetails){
+	public String generateToken(UserDetails userDetails) {
 
-        long nowMillis = System.currentTimeMillis();
-        long expMillis = nowMillis + 1000L * 60 * 60 * 24;
+		long nowMillis = System.currentTimeMillis();
+		long expMillis = nowMillis + 1000L * 60 * 60 * 24;
 
-        int passwordVersion = 0;
+		int passwordVersion = 0;
 
-        if (userDetails instanceof Users) {
-            Integer version = ((Users) userDetails).getPasswordVersion();
-            passwordVersion = version;
-        }
+		if (userDetails instanceof Users) {
+			passwordVersion = ((Users) userDetails).getPasswordVersion();
+		}
 
-        return Jwts.builder()
-                .claim("sub", userDetails.getUsername())
-                .claim("passwordVersion", passwordVersion)
-                .claim("iat", nowMillis / 1000L)
-                .claim("exp", expMillis / 1000L)
-                .signWith(getSigningKey())
-                .compact();
+		return Jwts.builder()
+			.claim("sub", userDetails.getUsername())
+			.claim("passwordVersion", passwordVersion)
+			.claim("iat", nowMillis / 1000L)
+			.claim("exp", expMillis / 1000L)
+			.signWith(getSigningKey())
+			.compact();
 
-    }
+	}
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        Claims claims = Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-        return claimsResolver.apply(claims);
-    }
+	public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+		Claims claims = Jwts.parser()
+			.verifyWith(getSigningKey())
+			.build()
+			.parseSignedClaims(token)
+			.getPayload();
+		return claimsResolver.apply(claims);
+	}
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
+	public String extractUsername(String token) {
+		return extractClaim(token, Claims::getSubject);
+	}
 
-    public boolean validToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return username != null && username.equals(userDetails.getUsername()) && !isTokenExpired(token);
-    }
+	public boolean validToken(String token, UserDetails userDetails) {
+		final String username = extractUsername(token);
+		return username != null && username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+	}
 
-    private boolean isTokenExpired(String token) {
-        Date expiration = extractClaim(token, Claims::getExpiration);
-        return expiration.before(new Date());
-    }
+	private boolean isTokenExpired(String token) {
+		Date expiration = extractClaim(token, Claims::getExpiration);
+		return expiration.before(new Date());
+	}
 
-    public String generateRegistrationToken(String email){
-        long nowMillis = System.currentTimeMillis();
-        long expMillis = nowMillis + 1000L * 60 * 5;
+	public String generateRegistrationToken(String email) {
+		long nowMillis = System.currentTimeMillis();
+		long expMillis = nowMillis + 1000L * 60 * 5;
 
-        return Jwts.builder()
-                .claim("sub", email)
-                .claim("purpose", "registration_session")
-                .claim("iat", nowMillis / 1000L)
-                .claim("exp", expMillis / 1000L)
-                .signWith(getSigningKey())
-                .compact();
-    }
+		return Jwts.builder()
+			.claim("sub", email)
+			.claim("purpose", "registration_session")
+			.claim("iat", nowMillis / 1000L)
+			.claim("exp", expMillis / 1000L)
+			.signWith(getSigningKey())
+			.compact();
+	}
 
 }

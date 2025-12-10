@@ -10,15 +10,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ApiResponse<T> {
 
-    public ApiResponse(int status, String message){
-        this.status = status;
-        this.message = message;
-    }
+	public ApiResponse(int status, String message) {
+		this.status = status;
+		this.message = message;
+	}
 
-    private int status;
-    private String message;
+	private int status;
+	private String message;
 
-    @Nullable
-    private T data;
+	@Nullable
+	private T data;
 
 }

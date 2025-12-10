@@ -13,15 +13,16 @@ import org.vitalup.vitalup.security.UsernameValidator;
 @Service
 public class UserService implements UserDetailsService {
 
-    private final userRepository userRepo;
-    private final UsernameValidator validator;
+	private final userRepository userRepo;
+	private final UsernameValidator validator;
 
-    @Override
-    public UserDetails loadUserByUsername(@Nonnull String username) throws UsernameNotFoundException {
+	@Override
+	public UserDetails loadUserByUsername(@Nonnull String username) throws UsernameNotFoundException {
 
-        if(validator.checkUsername(username)){
-            return userRepo.findByUsernameIgnoreCase(username).orElseThrow( () -> new UsernameNotFoundException("User not found"));
-        }
-        throw new UsernameNotFoundException("Invalid username:" + username);
-    }
+		if (validator.checkUsername(username)) {
+			return userRepo.findByUsernameIgnoreCase(username).orElseThrow(() ->
+				new UsernameNotFoundException("User not found"));
+		}
+		throw new UsernameNotFoundException("Invalid username:" + username);
+	}
 }

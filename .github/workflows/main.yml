@@ -1,0 +1,83 @@
+name: CI/CD - VitalUp
+
+on:
+  push:
+    branches:
+      - main
+      - development
+
+jobs:
+  build:
+    name: Build JAR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build project
+        run: mvn clean package -DskipTests
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitalup-jar
+          path: target/VitalUp.jar
+
+  deploy:
+    name: Deploy to EC2
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vitalup-jar
+          path: .
+
+      - name: Configure SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          if [ -z "${{ secrets.EC2_HOST }}" ]; then
+            echo "ERROR: EC2_HOST secret not set!"
+            exit 1
+          fi
+          echo "Adding EC2 host to known_hosts..."
+          ssh-keyscan -T 10 -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          echo "SSH config complete."
+
+
+      - name: Test SSH connection
+        run: |
+          echo "Testing SSH connection..."
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "echo 'Connected to EC2 successfully'"
+
+      - name: Copy JAR to EC2
+        run: |
+          echo "Copying JAR to EC2..."
+          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no VitalUp.jar ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/vitalup/VitalUp.jar
+
+      - name: Restart VitalUp service
+        run: |
+          echo "Restarting VitalUp service on EC2..."
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+            sudo systemctl daemon-reload
+            sudo systemctl restart vitalup
+            sudo systemctl status vitalup --no-pager
+            echo "Deployment successful."
+          EOF

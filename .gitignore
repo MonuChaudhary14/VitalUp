@@ -19,6 +19,8 @@ target/
 *.iws
 *.iml
 *.ipr
+.idea/misc.xml
+application.log
 
 ### NetBeans ###
 /nbproject/private/
@@ -32,3 +34,9 @@ build/
 
 ### VS Code ###
 .vscode/
+.env
+
+### macOS ###
+.DS_Store
+/static/
+*.gz

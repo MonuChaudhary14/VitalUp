@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ResendOtpDTO {
 
-    String email;
-    String token;
+	String email;
+	String token;
 
 }

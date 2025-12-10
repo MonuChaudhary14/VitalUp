@@ -1,6 +1,5 @@
 package org.vitalup.vitalup.service.AuthService;
 
-import org.springframework.web.bind.annotation.RequestBody;
 import org.vitalup.vitalup.dto.ApiResponse;
 import org.vitalup.vitalup.dto.Auth.ForgotPassword.ForgotPasswordRespond;
 import org.vitalup.vitalup.dto.Auth.ForgotPassword.ValidateForgotOtpRequest;
@@ -29,5 +28,7 @@ public interface AuthInterface {
     ApiResponse<String> resendForgotPasswordOtp(ResendForgotOtpRequest request);
 
     ApiResponse<String> resetPassword(ResetPasswordRequest request);
+
+    ApiResponse<String> registerOrLoginWithGoogle(String email, String username, String googleId);
 
 }

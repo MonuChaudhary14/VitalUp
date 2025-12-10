@@ -2,6 +2,7 @@ package org.vitalup.vitalup.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -22,64 +23,77 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 public class SecurityConfig {
 
-    private final Filter filter;
-    private final AuthenticationProvider authenticationProvider;
+  private final Filter filter;
+  private final AuthenticationProvider authenticationProvider;
 
-    public SecurityConfig(Filter filter, AuthenticationProvider authenticationProvider) {
-        this.filter = filter;
-        this.authenticationProvider = authenticationProvider;
-    }
+  public SecurityConfig(Filter filter, AuthenticationProvider authenticationProvider) {
+    this.filter = filter;
+    this.authenticationProvider = authenticationProvider;
+  }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource(){
-        CorsConfiguration config = new CorsConfiguration();
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
+    config.setAllowedOrigins(List.of("*"));
+    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+    config.setAllowedHeaders(List.of("*"));
+    config.setExposedHeaders(List.of("Authorization"));
+    config.setAllowCredentials(true);
+    config.setMaxAge(3600L);
 
-        config.setAllowedOrigins(List.of(
-                ""
-        ));
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);
+    return source;
+  }
 
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setExposedHeaders(List.of("Authorization"));
-        config.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        config.setMaxAge(3600L);
-        return source;
+  @Bean
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) {
+    return authConfig.getAuthenticationManager();
+  }
 
-    }
+  @Bean
+  @Order(1)
+  public SecurityFilterChain apiSecurity(HttpSecurity http) {
+    http
+      .securityMatcher("/api/**") // applies only to API routes
+      .cors(withDefaults())
+      .csrf(AbstractHttpConfigurer::disable)
+      .authorizeHttpRequests(auth -> auth
+        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+        .requestMatchers("/api/v1/auth/**").permitAll()
+        .anyRequest().authenticated()
+      )
+      .sessionManagement(session ->
+        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+      )
+      .authenticationProvider(authenticationProvider)
+      .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+      .formLogin(AbstractHttpConfigurer::disable)
+      .httpBasic(AbstractHttpConfigurer::disable)
+      .oauth2Login(AbstractHttpConfigurer::disable);
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig){
-        return authConfig.getAuthenticationManager();
-    }
+    return http.build();
+  }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http){
+  @Bean
+  @Order(2)
+  public SecurityFilterChain webSecurity(HttpSecurity http) {
+    http
+      .securityMatcher("/", "/login**", "/oauth2/**", "/dashboard", "/api/user/info")
+      .authorizeHttpRequests(auth -> auth
+        .requestMatchers("/", "/login**", "/oauth2/**").permitAll()
+        .anyRequest().authenticated()
+      )
+      .csrf(AbstractHttpConfigurer::disable)
+      .formLogin(AbstractHttpConfigurer::disable)
+      .sessionManagement(session ->
+        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+      )
+      .oauth2Login(oauth -> oauth
+        .loginPage("/login")
+        .defaultSuccessUrl("/dashboard", true)
+      );
 
-        http.cors(withDefaults())
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(
-                                "/api/v1/auth/login",
-                                "api/v1/auth/registration",
-                                "api/v1/auth/validateRegistration",
-                                "api/v1/auth/forgotPassword",
-                                "api/v1/auth/validateForgotPassword",
-                                "api/v1/auth/resendotp",
-                                "api/v1/auth/resendForgotOtp",
-                                "api/v1/auth/resetpassword"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-
-                )
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
-
+    return http.build();
+  }
 }

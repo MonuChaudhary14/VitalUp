@@ -20,64 +20,75 @@ import java.util.UUID;
 @EqualsAndHashCode
 public class Users implements UserDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private UUID id;
 
-    @Column(unique = true)
-    private String email;
+	@Column(unique = true)
+	private String email;
 
-    private String password;
+	private String password;
 
-    @Enumerated(EnumType.STRING)
-    private UserRole userRole;
+	@Enumerated(EnumType.STRING)
+	private UserRole userRole;
 
-    @Column(unique = true)
-    private String username;
+	@Column(unique = true)
+	private String username;
 
-    private int passwordVersion;
+	private int passwordVersion;
 
-    private String refreshToken;
-    private LocalDateTime refreshTokenExpiry;
+	private String refreshToken;
+	private LocalDateTime refreshTokenExpiry;
 
-    private Boolean locked = false;
-    private Boolean enabled = false;
-    private Boolean isVerifiedRegistration = false;
+	private Boolean locked = false;
+	private Boolean enabled = false;
+	private Boolean isVerifiedRegistration = false;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority(userRole.name()));
-    }
+	@Column(name = "google_id", unique = true)
+	private String googleId;
 
-    @Override
-    public String getUsername() {
-        return username;
-    }
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return Collections.singletonList(new SimpleGrantedAuthority(userRole.name()));
+	}
 
-    @Override
-    public boolean isAccountNonExpired() { return true; }
+	@Override
+	public String getUsername() {
+		return username;
+	}
 
-    @Override
-    public boolean isAccountNonLocked() { return true; }
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
 
-    @Override
-    public boolean isCredentialsNonExpired() { return true; }
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
 
-    @Override
-    public boolean isEnabled() { return true; }
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+	@PrePersist
+	protected void onCreate() {
+		createdAt = LocalDateTime.now();
+		updatedAt = LocalDateTime.now();
+	}
+
+	@PreUpdate
+	protected void onUpdate() {
+		updatedAt = LocalDateTime.now();
+	}
 
 }

@@ -10,21 +10,21 @@ import org.vitalup.vitalup.entities.Auth.Users;
 @RequiredArgsConstructor
 public class VerificationService {
 
-    private final UserNameService userNameService;
-    private final PasswordEncoder passwordEncoder;
+	private final UserNameService userNameService;
+	private final PasswordEncoder passwordEncoder;
 
-    public boolean checkCredentials(Users user, String password){
-        if (user == null || password == null) return false;
+	public boolean checkCredentials(Users user, String password) {
+		if (user == null || password == null) return false;
 
-        return passwordEncoder.matches(password, user.getPassword());
-    }
+		return passwordEncoder.matches(password, user.getPassword());
+	}
 
-    public LoginResponseDTO generateTokens(Users user){
+	public LoginResponseDTO generateTokens(Users user) {
 
-        String token = userNameService.generateToken(user);
+		String token = userNameService.generateToken(user);
 
-        return new LoginResponseDTO(token);
+		return new LoginResponseDTO(token);
 
-    }
+	}
 
 }

@@ -4,12 +4,13 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @Data
+@RequiredArgsConstructor
 public class ForgotPasswordRespond{
 
-    public ForgotPasswordRespond(String token){
-        this.token = token;
-    }
+	public ForgotPasswordRespond(String token){
+		this.token = token;
+	}
 
-    private String token;
+	private String token;
 
 }

@@ -3,7 +3,6 @@ package org.vitalup.vitalup.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.vitalup.vitalup.dto.Auth.Registration.RegistrationRequestDTO;
-import org.vitalup.vitalup.entities.Auth.Users;
 import org.vitalup.vitalup.entities.OTP.OtpType;
 import org.vitalup.vitalup.security.EmailValidator;
 import tools.jackson.databind.ObjectMapper;
@@ -24,7 +23,6 @@ public class OTPService {
 	private static final int COOLDOWN_SECONDS = 30;
 	private static final int TEMP_REGISTRATION_EXPIRE = 600;
 	private static final int BLOCK_DURATION = 300;
-	private static final int TEMP_TOKEN_EXPIRE = 2592000;
 
 	private static final SecureRandom random = new SecureRandom();
 
@@ -138,31 +136,6 @@ public class OTPService {
 	public boolean isBlocked(String email, OtpType type) {
 		String blockKey = "OTP_BLOCKED_" + type + "_" + email;
 		return redisService.exists(blockKey);
-	}
-
-	public String sendOTPWithTempToken(Users user, OtpType type) {
-		String email;
-		if (user.getEmail() != null && !user.getEmail().isBlank()) {
-			email = user.getEmail();
-		} else {
-			throw new RuntimeException("User has no email to send OTP to.");
-		}
-
-		sendOTP(email, type);
-
-		String tempTokenKey = "TEMP_TOKEN_" + type + "_" + email;
-		redisService.deleteValue(tempTokenKey);
-		redisService.saveValue(tempTokenKey, user.getRefreshToken(), TEMP_TOKEN_EXPIRE);
-
-		String tokenToEmailKey = type.name() + "_" + user.getRefreshToken();
-		redisService.saveValue(tokenToEmailKey, email, TEMP_TOKEN_EXPIRE);
-
-		return user.getRefreshToken();
-	}
-
-	public String extractEmailFromToken(String tempToken, OtpType type) {
-		String key = type.name() + "_" + tempToken;
-		return redisService.getValue(key);
 	}
 
 	public void deleteRegistrationSessionToken(String token) {

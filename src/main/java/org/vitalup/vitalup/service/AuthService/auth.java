@@ -350,15 +350,19 @@ public class auth implements AuthInterface {
 	}
 
 	public ApiResponse<String> resendForgotPasswordOtp(ResendForgotOtpRequest request) {
-		if (request.getToken() == null) {
+		if (request.getEmail() == null || request.getToken() == null) {
 			return new ApiResponse<>(400, "Check your fields", null);
 		}
 
+		String rawEmail = request.getEmail();
 		String token = request.getToken();
+		if (!validator.checkEmail(rawEmail)) {
+			return new ApiResponse<>(400, "Check the email format", null);
+		}
+		String email = validator.normaliseEmail(rawEmail);
 
-		String email = otpService.extractEmailFromToken(token, OtpType.FORGOT_PASSWORD);
-
-		if (email == null) {
+		String savedSession = redisService.getValue("FORGOT_SESSION_" + email);
+		if (savedSession == null || !savedSession.equals(token)) {
 			return new ApiResponse<>(403, "Session expired or invalid", null);
 		}
 
@@ -368,24 +372,10 @@ public class auth implements AuthInterface {
 				" seconds before requesting OTP again.", null);
 		}
 
-		Users user;
-		try {
-			if (validator.checkEmail(email)) {
-				user = getUserByEmail(email);
-			} else {
-				throw new Exception();
-			}
-		} catch (Exception e) {
-			return new ApiResponse<>(404, "User not found", null);
-		}
+		otpService.sendOTP(email, OtpType.FORGOT_PASSWORD);
+		redisService.saveValue("FORGOT_SESSION_" + email, token, TEMP_TOKEN_EXPIRE);
 
-		try {
-			String newTempToken = sendForgotPasswordOtpAndCreateTempToken(email, user);
-			return new ApiResponse<>(200, "OTP resent successfully.", newTempToken);
-		} catch (RuntimeException e) {
-			return new ApiResponse<>(429, e.getMessage(), null);
-		}
-
+		return new ApiResponse<>(200, "OTP resent successfully.", token);
 	}
 
 	public ApiResponse<String> resetPassword(ResetPasswordRequest request) {

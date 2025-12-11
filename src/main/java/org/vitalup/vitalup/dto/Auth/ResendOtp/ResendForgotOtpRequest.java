@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResendForgotOtpRequest {
-
+	private String email;
 	private String token;
-
 }

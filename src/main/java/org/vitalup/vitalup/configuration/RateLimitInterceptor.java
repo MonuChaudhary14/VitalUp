@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.vitalup.vitalup.service.authService.RateLimitService;
+import org.vitalup.vitalup.service.AuthService.RateLimitService;
 
 @Component
 public class RateLimitInterceptor implements HandlerInterceptor {

@@ -1,4 +1,4 @@
-package org.vitalup.vitalup.service.authService;
+package org.vitalup.vitalup.service.AuthService;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;

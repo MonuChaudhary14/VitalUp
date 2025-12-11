@@ -13,6 +13,8 @@ import org.vitalup.vitalup.dto.Auth.Registration.RegistrationRequestDTO;
 import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendForgotOtpRequest;
 import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendOtpDTO;
 import org.vitalup.vitalup.dto.Auth.ResetPassword.ResetPasswordRequest;
+import org.vitalup.vitalup.dto.Auth.Token.RefreshTokenRequest;
+import org.vitalup.vitalup.dto.Auth.Token.RefreshTokenResponse;
 import org.vitalup.vitalup.entities.Auth.UserRole;
 import org.vitalup.vitalup.entities.Auth.Users;
 import org.vitalup.vitalup.entities.OTP.OtpType;
@@ -37,7 +39,6 @@ public class AuthenticationService implements AuthInterface {
 	private final PasswordEncoder passwordEncoder;
 	private final UserNameService usernameService;
 	private final RedisService redisService;
-	private static final long FORGOT_TOKEN_EXPIRE_SECONDS = 295929000L;
 	private static final int TEMP_TOKEN_EXPIRE = 300;
 
 	public ApiResponse<LoginResponseDTO> login(LoginDTO request) {
@@ -47,7 +48,6 @@ public class AuthenticationService implements AuthInterface {
 		}
 
 		String rawUsername = request.getUsername();
-		String rawPassword = request.getPassword();
 
 		Users user;
 
@@ -73,21 +73,6 @@ public class AuthenticationService implements AuthInterface {
 		if (!verificationService.checkCredentials(user, request.getPassword())) {
 			return new ApiResponse<>(401, "Invalid credentials", null);
 		}
-
-//        if (isRefreshTokenExpired(user)){
-//
-//            LoginResponseDTO newToken = generateTokensOrNull(user);
-//
-//            if (newToken == null){
-//                return new ApiResponse<>(500, "Failed to generate tokens", null);
-//            }
-//
-//            user.setRefreshToken(newToken.getRefreshToken());
-//            user.setRefreshTokenExpiry(LocalDateTime.now().plusDays(7));  // 7 days, example
-//            userRepository.save(user);
-//
-//            return new ApiResponse<>(200, "Logged in successfully (new refresh token issued)", newToken);
-//        }
 
 		LoginResponseDTO token = generateTokensOrNull(user);
 		if (token == null) {
@@ -448,21 +433,6 @@ public class AuthenticationService implements AuthInterface {
 		return newUser;
 	}
 
-	private String sendForgotPasswordOtpAndCreateTempToken(String email, Users user) {
-		otpService.sendOTP(email, OtpType.FORGOT_PASSWORD);
-
-		long tokenExpire = FORGOT_TOKEN_EXPIRE_SECONDS;
-
-		String tempTokenKey = "TEMP_TOKEN_" + OtpType.FORGOT_PASSWORD + "_" + email;
-		redisService.deleteValue(tempTokenKey);
-		redisService.saveValue(tempTokenKey, user.getRefreshToken(), tokenExpire);
-
-		String tokenToIdentifierKey = OtpType.FORGOT_PASSWORD.name() + "_" + user.getRefreshToken();
-		redisService.saveValue(tokenToIdentifierKey, email, tokenExpire);
-
-		return user.getRefreshToken();
-	}
-
 	private boolean isUserAlreadyVerified(String email) {
 		try {
 			Users existingUser;
@@ -510,6 +480,37 @@ public class AuthenticationService implements AuthInterface {
 		String jwt = usernameService.generateToken(user);
 
 		return new ApiResponse<>(200, "Logged in with Google successfully", jwt);
+	}
+
+	public ApiResponse<RefreshTokenResponse> refreshAccessToken(RefreshTokenRequest request) {
+		if (request == null || request.refreshToken() == null || request.refreshToken().isBlank()) {
+			return new ApiResponse<>(400, "Refresh token is required", null);
+		}
+
+		String refreshToken = request.refreshToken();
+
+		Users user = userRepo.findAll().stream()
+			.filter(u -> refreshToken.equals(u.getRefreshToken()))
+			.findFirst()
+			.orElse(null);
+
+		if (user == null) {
+			return new ApiResponse<>(401, "Invalid refresh token", null);
+		}
+
+		if (isRefreshTokenExpired(user)) {
+			return new ApiResponse<>(401, "Refresh token expired. Please log in again.",
+				null);
+		}
+
+		String newAccessToken = usernameService.generateToken(user);
+		String newRefreshToken = UUID.randomUUID().toString();
+		user.setRefreshToken(newRefreshToken);
+		user.setRefreshTokenExpiry(LocalDateTime.now().plusDays(7));
+		userRepo.save(user);
+
+		return new ApiResponse<>(200, "New tokens issued",
+			new RefreshTokenResponse(newAccessToken, newRefreshToken));
 	}
 
 }

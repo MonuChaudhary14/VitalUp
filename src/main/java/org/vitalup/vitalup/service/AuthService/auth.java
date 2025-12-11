@@ -52,16 +52,20 @@ public class auth implements AuthInterface {
 		try {
 			if (usernameValidator.checkUsername(rawUsername)) {
 				user = getUserByUsername(rawUsername);
+			} else if (validator.checkEmail(rawUsername)) {
+				user = getUserByEmail(rawUsername);
 			} else {
-				return new ApiResponse<>(400, "Invalid username format", null);
+				return new ApiResponse<>(400,
+					"Invalid username or email format", null);
 			}
+
 		} catch (UsernameNotFoundException e) {
 			return new ApiResponse<>(400, "User not found", null);
 		}
 
 		if (!Boolean.TRUE.equals(user.getEnabled())) {
-			return new ApiResponse<>(403, "Account not enabled. Please verify your OTP first.",
-				null);
+			return new ApiResponse<>(403,
+				"Account not enabled. Please verify your OTP first.", null);
 		}
 
 		if (!verificationService.checkCredentials(user, request.getPassword())) {
@@ -93,7 +97,8 @@ public class auth implements AuthInterface {
 
 	public ApiResponse<String> registration(RegistrationRequestDTO request) {
 
-		if (request == null || request.getEmail() == null || request.getPassword() == null || request.getUsername() == null) {
+		if (request == null || request.getEmail() == null || request.getPassword() == null ||
+			request.getUsername() == null) {
 			return new ApiResponse<>(400, "Some fields are missing", null);
 		}
 		String email;
@@ -137,8 +142,8 @@ public class auth implements AuthInterface {
 
 	public ApiResponse<?> validateRegistrationOtp(RegistrationOtpDTO request) {
 
-		if (request == null || request.getEmail() == null || request.getOtp() == null || request.getType() == null ||
-			request.getToken() == null) {
+		if (request == null || request.getEmail() == null || request.getOtp() == null ||
+			request.getType() == null || request.getToken() == null) {
 			return new ApiResponse<>(400, "Check your fields");
 		}
 
@@ -158,11 +163,13 @@ public class auth implements AuthInterface {
 		OtpType type = request.getType();
 
 		if (type != OtpType.REGISTRATION) {
-			return new ApiResponse<>(400, "Only registration OTP can be validated here.", null);
+			return new ApiResponse<>(400, "Only registration OTP can be validated here.",
+				null);
 		}
 
 		if (otpService.isBlocked(email, type)) {
-			return new ApiResponse<>(429, "Too many invalid OTP attempts. Try again later.", null);
+			return new ApiResponse<>(429,
+				"Too many invalid OTP attempts. Try again later.", null);
 		}
 
 		if (otpService.isUsed(email, type)) {
@@ -175,16 +182,19 @@ public class auth implements AuthInterface {
 			long attempts = otpService.incrementOtpAttempts(email, type);
 			if (attempts >= 3) {
 				otpService.blockOtp(email, type);
-				return new ApiResponse<>(429, "Too many invalid attempts. Please request a new OTP.", null);
+				return new ApiResponse<>(429,
+					"Too many invalid attempts. Please request a new OTP.", null);
 			}
-			return new ApiResponse<>(400, "Invalid or expired OTP. Attempts left: " + (3 - attempts), null);
+			return new ApiResponse<>(400, "Invalid or expired OTP. Attempts left: " +
+				(3 - attempts), null);
 		}
 		otpService.markAsUsed(email, request.getOtp(), type);
 
 		try {
 			RegistrationRequestDTO tempRequest = otpService.getTempOtp(email);
 			if (tempRequest == null) {
-				return new ApiResponse<>(400, "Registration session expired or not found", null);
+				return new ApiResponse<>(400, "Registration session expired or not found",
+					null);
 			}
 
 			if (isUserAlreadyRegistered(tempRequest)) {
@@ -201,7 +211,8 @@ public class auth implements AuthInterface {
 			return new ApiResponse<>(200, "Registration verified successfully", null);
 
 		} catch (Exception e) {
-			return new ApiResponse<>(500, "Registration verification failed: " + e.getMessage(), null);
+			return new ApiResponse<>(500, "Registration verification failed: " +
+				e.getMessage(), null);
 		}
 	}
 
@@ -256,7 +267,8 @@ public class auth implements AuthInterface {
 		}
 
 		if (otpService.isBlocked(email, OtpType.FORGOT_PASSWORD)) {
-			return new ApiResponse<>(429, "Too many invalid OTP attempts. Try again later.", null);
+			return new ApiResponse<>(429,
+				"Too many invalid OTP attempts. Try again later.", null);
 		}
 
 		if (otpService.isUsed(email, OtpType.FORGOT_PASSWORD)) {
@@ -268,9 +280,11 @@ public class auth implements AuthInterface {
 			long attempts = otpService.incrementOtpAttempts(email, OtpType.FORGOT_PASSWORD);
 			if (attempts >= 3) {
 				otpService.blockOtp(email, OtpType.FORGOT_PASSWORD);
-				return new ApiResponse<>(429, "Too many invalid OTP attempts. Request a new OTP.", null);
+				return new ApiResponse<>(429,
+					"Too many invalid OTP attempts. Request a new OTP.", null);
 			}
-			return new ApiResponse<>(400, "Invalid or expired OTP. Attempts left: " + (3 - attempts), null);
+			return new ApiResponse<>(400, "Invalid or expired OTP. Attempts left: " +
+				(3 - attempts), null);
 		}
 
 		otpService.markAsUsed(email, otp, OtpType.FORGOT_PASSWORD);
@@ -312,16 +326,19 @@ public class auth implements AuthInterface {
 		boolean sessionValid = savedToken != null && savedToken.equals(token);
 
 		if (!sessionValid) {
-			return new ApiResponse<>(403, "Invalid or expired registration session token", null);
+			return new ApiResponse<>(403, "Invalid or expired registration session token",
+				null);
 		}
 
 		if (isUserAlreadyVerified(email)) {
-			return new ApiResponse<>(400, "User already verified. No OTP needed.", null);
+			return new ApiResponse<>(400, "User already verified. No OTP needed.",
+				null);
 		}
 
 		if (otpService.isInCooldown(email, OtpType.REGISTRATION)) {
 			long secondsLeft = otpService.cooldownTime(email, OtpType.REGISTRATION);
-			return new ApiResponse<>(400, "Please wait " + secondsLeft + " seconds before requesting OTP again.", null);
+			return new ApiResponse<>(400, "Please wait " + secondsLeft +
+				" seconds before requesting OTP again.", null);
 		}
 
 		try {
@@ -348,7 +365,8 @@ public class auth implements AuthInterface {
 
 		if (otpService.isInCooldown(email, OtpType.FORGOT_PASSWORD)) {
 			long secondsLeft = otpService.cooldownTime(email, OtpType.FORGOT_PASSWORD);
-			return new ApiResponse<>(400, "Please wait " + secondsLeft + " seconds before requesting OTP again.", null);
+			return new ApiResponse<>(400, "Please wait " + secondsLeft +
+				" seconds before requesting OTP again.", null);
 		}
 
 		Users user;
@@ -401,13 +419,13 @@ public class auth implements AuthInterface {
 
 		redisService.deleteValue("TEMP_RESET_" + tempToken);
 
-		return new ApiResponse<>(200, "Password has been reset successfully.", null);
+		return new ApiResponse<>(200, "Password has been reset successfully.",
+			null);
 	}
 
-	// Methods
-
 	private Users getUserByEmail(String email) {
-		return userRepo.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User does not found"));
+		return userRepo.findByEmail(email).orElseThrow(() ->
+			new UsernameNotFoundException("User does not found"));
 	}
 
 	private boolean existsByEmail(String email) {
@@ -429,6 +447,7 @@ public class auth implements AuthInterface {
 	private Users buildUserFromRequest(RegistrationRequestDTO tempRequest) {
 		Users newUser = new Users();
 		newUser.setEmail(tempRequest.getEmail());
+		newUser.setUsername(tempRequest.getUsername());
 		newUser.setPassword(tempRequest.getPassword());
 		newUser.setIsVerifiedRegistration(true);
 		newUser.setEnabled(true);
@@ -468,7 +487,8 @@ public class auth implements AuthInterface {
 	}
 
 	private Users getUserByUsername(String userName) {
-		return userRepo.findByUsernameIgnoreCase(userName).orElseThrow(() -> new UsernameNotFoundException("User does not found"));
+		return userRepo.findByUsernameIgnoreCase(userName).orElseThrow(() ->
+			new UsernameNotFoundException("User does not found"));
 	}
 
 	private boolean isRefreshTokenExpired(Users user) {
@@ -477,7 +497,8 @@ public class auth implements AuthInterface {
 			LocalDateTime.now().isAfter(user.getRefreshTokenExpiry());
 	}
 
-	public ApiResponse<String> registerOrLoginWithGoogle(String email, String username, String googleId) {
+	public ApiResponse<String> registerOrLoginWithGoogle(String email, String username,
+																											 String googleId) {
 		if (email == null || googleId == null) {
 			return new ApiResponse<>(400, "Invalid Google user data", null);
 		}
@@ -485,18 +506,16 @@ public class auth implements AuthInterface {
 		Users user = userRepo.findByEmail(email).orElse(null);
 
 		if (user == null) {
-			// Create new user from Google
 			user = new Users();
 			user.setEmail(email);
 			user.setUsername(username != null ? username : email.split("@")[0]);
 			user.setEnabled(true);
 			user.setLocked(false);
 			user.setUserRole(UserRole.USER);
-			user.setGoogleId(googleId); // add a googleId column in your table
+			user.setGoogleId(googleId);
 			userRepo.save(user);
 		}
 
-		// Generate JWT token for this user
 		String jwt = usernameService.generateToken(user);
 
 		return new ApiResponse<>(200, "Logged in with Google successfully", jwt);

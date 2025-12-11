@@ -1,4 +1,4 @@
-package org.vitalup.vitalup.service.AuthService;
+package org.vitalup.vitalup.service.authService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;

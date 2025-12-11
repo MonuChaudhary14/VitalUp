@@ -1,4 +1,4 @@
-package org.vitalup.vitalup.service.AuthService;
+package org.vitalup.vitalup.service.Interface;
 
 import org.vitalup.vitalup.dto.ApiResponse;
 import org.vitalup.vitalup.dto.Auth.ForgotPassword.ForgotPasswordRespond;

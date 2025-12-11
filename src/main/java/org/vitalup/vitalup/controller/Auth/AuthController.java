@@ -18,7 +18,7 @@ import org.vitalup.vitalup.dto.Auth.Registration.RegistrationRequestDTO;
 import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendForgotOtpRequest;
 import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendOtpDTO;
 import org.vitalup.vitalup.dto.Auth.ResetPassword.ResetPasswordRequest;
-import org.vitalup.vitalup.service.AuthService.AuthInterface;
+import org.vitalup.vitalup.service.Interface.AuthInterface;
 
 @RestController
 @RequestMapping("api/v1/auth")

@@ -1,4 +1,4 @@
-package org.vitalup.vitalup.service.AuthService;
+package org.vitalup.vitalup.service.authService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,12 +20,14 @@ import org.vitalup.vitalup.repository.Auth.userRepository;
 import org.vitalup.vitalup.security.EmailValidator;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.vitalup.vitalup.security.UsernameValidator;
+import org.vitalup.vitalup.service.Interface.AuthInterface;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class auth implements AuthInterface {
+public class AuthenticationService implements AuthInterface {
 
 	private final EmailValidator validator;
 	private final UsernameValidator usernameValidator;

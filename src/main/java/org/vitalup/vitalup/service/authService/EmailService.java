@@ -1,4 +1,4 @@
-package org.vitalup.vitalup.service.AuthService;
+package org.vitalup.vitalup.service.authService;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

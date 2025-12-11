@@ -1,4 +1,4 @@
-package org.vitalup.vitalup.service.AuthService;
+package org.vitalup.vitalup.service.authService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

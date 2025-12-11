@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.vitalup.vitalup.dto.ApiResponse;
-import org.vitalup.vitalup.service.AuthService.AuthInterface;
+import org.vitalup.vitalup.service.Interface.AuthInterface;
 
 import java.util.Map;
 

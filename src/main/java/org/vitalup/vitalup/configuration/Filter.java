@@ -13,8 +13,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.vitalup.vitalup.entities.Auth.Users;
-import org.vitalup.vitalup.service.AuthService.UserNameService;
-import org.vitalup.vitalup.service.AuthService.UserService;
+import org.vitalup.vitalup.service.authService.UserNameService;
+import org.vitalup.vitalup.service.authService.UserService;
 
 import java.io.IOException;
 import java.util.function.Function;
@@ -52,7 +52,7 @@ public class Filter extends OncePerRequestFilter {
       }
     }
 
-    // ✅ Proceed only if username is not null and no auth is set
+    // ✅ Proceed only if username is not null and no AuthenticationService is set
     if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
       UserDetails userDetails = userService.loadUserByUsername(userName);
       Users user = (Users) userDetails;

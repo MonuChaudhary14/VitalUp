@@ -20,8 +20,8 @@ import org.vitalup.vitalup.repository.Auth.userRepository;
 import org.vitalup.vitalup.security.EmailValidator;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.vitalup.vitalup.security.UsernameValidator;
-
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -208,7 +208,8 @@ public class auth implements AuthInterface {
 			otpService.deleteOTP(email, OtpType.REGISTRATION);
 			otpService.deleteRegistrationSessionToken(email);
 
-			return new ApiResponse<>(200, "Registration verified successfully", null);
+			return new ApiResponse<>(200,
+				"Registration verified successfully", null);
 
 		} catch (Exception e) {
 			return new ApiResponse<>(500, "Registration verification failed: " +
@@ -217,44 +218,42 @@ public class auth implements AuthInterface {
 	}
 
 	public ApiResponse<String> forgotPassword(String email) {
-		if (email == null) {
+		if (email == null || email.isBlank()) {
 			return new ApiResponse<>(400, "Check your fields", null);
 		}
 
-		String updatedEmail;
-		Users user;
+		String normalizedEmail = validator.normaliseEmail(email);
+		boolean userExists = userRepo.existsByEmail(normalizedEmail);
+		String sessionToken = UUID.randomUUID().toString();
 
 		try {
-			if (validator.checkEmail(email)) {
-				updatedEmail = validator.normaliseEmail(email);
-				user = getUserByEmail(email);
-			} else {
-				return new ApiResponse<>(400, "Check your email format");
+			if (userExists) {
+				otpService.sendOTP(normalizedEmail, OtpType.FORGOT_PASSWORD);
+				redisService.saveValue("FORGOT_SESSION_" + normalizedEmail, sessionToken,
+					TEMP_TOKEN_EXPIRE);
 			}
-		} catch (Exception e) {
-			return new ApiResponse<>(400, "Otp has been sent to your email");
+			String message = "If this email exists, an OTP has been sent to your inbox";
+			String data = null;
+			if (userExists) {
+				data = sessionToken;
+			}
+
+			return new ApiResponse<>(200, message, data);
+
+		} catch (RuntimeException e) {
+			return new ApiResponse<>(500, "Failed to send OTP", null);
 		}
-
-		if (otpService.isInCooldown(email, OtpType.FORGOT_PASSWORD)) {
-			long timeLeft = otpService.cooldownTime(updatedEmail, OtpType.FORGOT_PASSWORD);
-			return new ApiResponse<>(400, "Please wait for " + timeLeft + " seconds");
-		}
-
-		String tempToken = sendForgotPasswordOtpAndCreateTempToken(updatedEmail, user);
-
-		return new ApiResponse<>(200, "Otp has been sent to your email", tempToken);
-
 	}
 
 	public ApiResponse<ForgotPasswordRespond> validateForgotOtp(ValidateForgotOtpRequest request) {
-
-		if (request.getEmail() == null || request.getOtp() == null) {
+		if (request.getEmail() == null || request.getOtp() == null || request.getToken() == null) {
 			return new ApiResponse<>(400, "Check your fields", null);
 		}
 
 		String rawEmail = request.getEmail();
 		String email;
 		String otp = request.getOtp();
+		String sessionToken = request.getToken();
 
 		try {
 			if (validator.checkEmail(rawEmail)) {
@@ -264,6 +263,11 @@ public class auth implements AuthInterface {
 			}
 		} catch (IllegalArgumentException e) {
 			return new ApiResponse<>(400, "Check the email format", null);
+		}
+
+		String savedSession = redisService.getValue("FORGOT_SESSION_" + email);
+		if (savedSession == null || !savedSession.equals(sessionToken)) {
+			return new ApiResponse<>(403, "Invalid or expired session token", null);
 		}
 
 		if (otpService.isBlocked(email, OtpType.FORGOT_PASSWORD)) {
@@ -276,33 +280,28 @@ public class auth implements AuthInterface {
 		}
 
 		boolean valid = otpService.validateOTP(email, otp, OtpType.FORGOT_PASSWORD);
+
 		if (!valid) {
 			long attempts = otpService.incrementOtpAttempts(email, OtpType.FORGOT_PASSWORD);
 			if (attempts >= 3) {
 				otpService.blockOtp(email, OtpType.FORGOT_PASSWORD);
 				return new ApiResponse<>(429,
-					"Too many invalid OTP attempts. Request a new OTP.", null);
+					"Too many invalid attempts. Request a new OTP.", null);
 			}
-			return new ApiResponse<>(400, "Invalid or expired OTP. Attempts left: " +
-				(3 - attempts), null);
+			return new ApiResponse<>(400,
+				"Invalid or expired OTP. Attempts left: " + (3 - attempts), null);
 		}
 
 		otpService.markAsUsed(email, otp, OtpType.FORGOT_PASSWORD);
-		Users user;
-		try {
-			if (validator.checkEmail(email)) {
-				user = getUserByEmail(email);
-			} else {
-				throw new Exception();
-			}
-		} catch (Exception e) {
-			return new ApiResponse<>(400, "User not found", null);
-		}
 
-		String tempToken = usernameService.generateToken(user);
-		redisService.saveValue("TEMP_RESET_" + tempToken, email, TEMP_TOKEN_EXPIRE);
-		ForgotPasswordRespond tokenResponse = new ForgotPasswordRespond(tempToken);
+		String resetToken = UUID.randomUUID().toString();
 
+		int resetTtlSeconds = 15 * 60;
+		redisService.saveValue("TEMP_RESET_" + resetToken, email, resetTtlSeconds);
+
+		redisService.deleteValue("FORGOT_SESSION_" + email);
+
+		ForgotPasswordRespond tokenResponse = new ForgotPasswordRespond(resetToken);
 		return new ApiResponse<>(200, "OTP validated successfully", tokenResponse);
 	}
 
@@ -326,8 +325,8 @@ public class auth implements AuthInterface {
 		boolean sessionValid = savedToken != null && savedToken.equals(token);
 
 		if (!sessionValid) {
-			return new ApiResponse<>(403, "Invalid or expired registration session token",
-				null);
+			return new ApiResponse<>(403,
+				"Invalid or expired registration session token", null);
 		}
 
 		if (isUserAlreadyVerified(email)) {

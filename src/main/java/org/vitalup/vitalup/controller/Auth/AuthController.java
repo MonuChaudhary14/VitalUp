@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.vitalup.vitalup.dto.ApiResponse;
+import org.vitalup.vitalup.dto.Auth.ForgotPassword.EmailRequest;
 import org.vitalup.vitalup.dto.Auth.ForgotPassword.ForgotPasswordRespond;
 import org.vitalup.vitalup.dto.Auth.ForgotPassword.ValidateForgotOtpRequest;
 import org.vitalup.vitalup.dto.Auth.Login.LoginDTO;
@@ -47,8 +48,8 @@ public class AuthController {
 	}
 
 	@PostMapping("/forgotPassword")
-	public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody String email) {
-		ApiResponse<String> response = authService.forgotPassword(email);
+	public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody EmailRequest request) {
+		ApiResponse<String> response = authService.forgotPassword(request.getEmail());
 		return ResponseEntity.status(response.getStatus()).body(response);
 	}
 

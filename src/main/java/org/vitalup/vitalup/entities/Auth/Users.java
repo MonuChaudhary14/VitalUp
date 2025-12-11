@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,12 +52,12 @@ public class Users implements UserDetails {
 	private String googleId;
 
 	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
+	public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
 		return Collections.singletonList(new SimpleGrantedAuthority(userRole.name()));
 	}
 
 	@Override
-	public String getUsername() {
+	public @NonNull String getUsername() {
 		return username;
 	}
 

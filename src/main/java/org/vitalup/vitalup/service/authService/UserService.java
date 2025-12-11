@@ -2,6 +2,7 @@ package org.vitalup.vitalup.service.authService;
 
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,7 +18,7 @@ public class UserService implements UserDetailsService {
 	private final UsernameValidator validator;
 
 	@Override
-	public UserDetails loadUserByUsername(@Nonnull String username) throws UsernameNotFoundException {
+	public @NonNull UserDetails loadUserByUsername(@Nonnull String username) throws UsernameNotFoundException {
 
 		if (validator.checkUsername(username)) {
 			return userRepo.findByUsernameIgnoreCase(username).orElseThrow(() ->

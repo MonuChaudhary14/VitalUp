@@ -14,7 +14,9 @@ public class VerificationService {
 	private final PasswordEncoder passwordEncoder;
 
 	public boolean checkCredentials(Users user, String password) {
-		if (user == null || password == null) return false;
+		if (user == null || password == null) {
+			return false;
+		}
 
 		return passwordEncoder.matches(password, user.getPassword());
 	}

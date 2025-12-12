@@ -55,7 +55,7 @@ public class SecurityConfig {
   @Order(1)
   public SecurityFilterChain apiSecurity(HttpSecurity http) {
     http
-      .securityMatcher("/api/**") // applies only to API routes
+      .securityMatcher("/api/**")
       .cors(withDefaults())
       .csrf(AbstractHttpConfigurer::disable)
       .authorizeHttpRequests(auth -> auth

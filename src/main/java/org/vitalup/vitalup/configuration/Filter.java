@@ -40,19 +40,16 @@ public class Filter extends OncePerRequestFilter {
     String token = null;
     String userName = null;
 
-    // ✅ Extract JWT only if Authorization header exists
     if (header != null && header.startsWith("Bearer ")) {
       token = header.substring(7);
       try {
         userName = usernameService.extractUsername(token);
       } catch (Exception e) {
-        // Invalid or expired token — skip authentication
         filterChain.doFilter(request, response);
         return;
       }
     }
 
-    // ✅ Proceed only if username is not null and no AuthenticationService is set
     if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
       UserDetails userDetails = userService.loadUserByUsername(userName);
       Users user = (Users) userDetails;

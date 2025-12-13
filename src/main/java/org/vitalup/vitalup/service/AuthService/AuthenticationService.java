@@ -458,8 +458,7 @@ public class AuthenticationService implements AuthInterface {
 			LocalDateTime.now().isAfter(user.getRefreshTokenExpiry());
 	}
 
-	public ApiResponse<String> registerOrLoginWithGoogle(String email, String username,
-																											 String googleId) {
+	public ApiResponse<String> registerOrLoginWithGoogle(String email, String username,String googleId) {
 		if (email == null || googleId == null) {
 			return new ApiResponse<>(400, "Invalid Google user data", null);
 		}

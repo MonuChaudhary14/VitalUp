@@ -36,8 +36,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/registration")
-	public ResponseEntity<ApiResponse<String>> registration(@Valid @RequestBody
-																														RegistrationRequestDTO request) {
+	public ResponseEntity<ApiResponse<String>> registration(@Valid @RequestBody RegistrationRequestDTO request) {
 		ApiResponse<String> response = authService.registration(request);
 		return ResponseEntity.status(response.getStatus()).body(response);
 	}

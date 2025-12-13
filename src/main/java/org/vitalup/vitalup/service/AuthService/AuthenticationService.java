@@ -15,6 +15,7 @@ import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendOtpDTO;
 import org.vitalup.vitalup.dto.Auth.ResetPassword.ResetPasswordRequest;
 import org.vitalup.vitalup.dto.Auth.Token.RefreshTokenRequest;
 import org.vitalup.vitalup.dto.Auth.Token.RefreshTokenResponse;
+import org.vitalup.vitalup.dto.Auth.Username.UsernameAvailability;
 import org.vitalup.vitalup.entities.Auth.UserRole;
 import org.vitalup.vitalup.entities.Auth.Users;
 import org.vitalup.vitalup.entities.OTP.OtpType;
@@ -399,6 +400,78 @@ public class AuthenticationService implements AuthInterface {
 			null);
 	}
 
+	public ApiResponse<String> registerOrLoginWithGoogle(String email, String username,String googleId) {
+		if (email == null || googleId == null) {
+			return new ApiResponse<>(400, "Invalid Google user data", null);
+		}
+
+		Users user = userRepo.findByEmail(email).orElse(null);
+
+		if (user == null) {
+			user = new Users();
+			user.setEmail(email);
+			user.setUsername(username != null ? username : email.split("@")[0]);
+			user.setEnabled(true);
+			user.setLocked(false);
+			user.setUserRole(UserRole.USER);
+			user.setGoogleId(googleId);
+			userRepo.save(user);
+		}
+
+		String jwt = usernameService.generateToken(user);
+
+		return new ApiResponse<>(200, "Logged in with Google successfully", jwt);
+	}
+
+	public ApiResponse<RefreshTokenResponse> refreshAccessToken(RefreshTokenRequest request) {
+		if (request == null || request.refreshToken() == null || request.refreshToken().isBlank()) {
+			return new ApiResponse<>(400, "Refresh token is required", null);
+		}
+
+		String refreshToken = request.refreshToken();
+
+		Users user = userRepo.findAll().stream()
+				.filter(u -> refreshToken.equals(u.getRefreshToken()))
+				.findFirst()
+				.orElse(null);
+
+		if (user == null) {
+			return new ApiResponse<>(401, "Invalid refresh token", null);
+		}
+
+		if (isRefreshTokenExpired(user)) {
+			return new ApiResponse<>(401, "Refresh token expired. Please log in again.",
+					null);
+		}
+
+		String newAccessToken = usernameService.generateToken(user);
+		String newRefreshToken = UUID.randomUUID().toString();
+		user.setRefreshToken(newRefreshToken);
+		user.setRefreshTokenExpiry(LocalDateTime.now().plusDays(7));
+		userRepo.save(user);
+
+		return new ApiResponse<>(200, "New tokens issued",
+				new RefreshTokenResponse(newAccessToken, newRefreshToken));
+	}
+
+	public ApiResponse<UsernameAvailability> checkUsername(String username) {
+
+		if(username == null || username.trim().isEmpty()){
+			return new ApiResponse<>(400, "Invalid username", new UsernameAvailability(false,"Username cannot be empty"));
+		}
+
+		boolean exists = usernameExists(username);
+
+		if(exists){
+			return new ApiResponse<>(200,"Username already taken", new UsernameAvailability(false,"Username already taken"));
+		}
+
+		return new ApiResponse<>(200,"Username available", new UsernameAvailability(true,"Username is available"));
+	}
+
+
+	// Methods
+
 	private Users getUserByEmail(String email) {
 		return userRepo.findByEmail(email).orElseThrow(() ->
 			new UsernameNotFoundException("User does not found"));
@@ -458,58 +531,11 @@ public class AuthenticationService implements AuthInterface {
 			LocalDateTime.now().isAfter(user.getRefreshTokenExpiry());
 	}
 
-	public ApiResponse<String> registerOrLoginWithGoogle(String email, String username,String googleId) {
-		if (email == null || googleId == null) {
-			return new ApiResponse<>(400, "Invalid Google user data", null);
+	private boolean usernameExists(String username) {
+		if(username == null || username.trim().isEmpty()){
+			return false;
 		}
-
-		Users user = userRepo.findByEmail(email).orElse(null);
-
-		if (user == null) {
-			user = new Users();
-			user.setEmail(email);
-			user.setUsername(username != null ? username : email.split("@")[0]);
-			user.setEnabled(true);
-			user.setLocked(false);
-			user.setUserRole(UserRole.USER);
-			user.setGoogleId(googleId);
-			userRepo.save(user);
-		}
-
-		String jwt = usernameService.generateToken(user);
-
-		return new ApiResponse<>(200, "Logged in with Google successfully", jwt);
-	}
-
-	public ApiResponse<RefreshTokenResponse> refreshAccessToken(RefreshTokenRequest request) {
-		if (request == null || request.refreshToken() == null || request.refreshToken().isBlank()) {
-			return new ApiResponse<>(400, "Refresh token is required", null);
-		}
-
-		String refreshToken = request.refreshToken();
-
-		Users user = userRepo.findAll().stream()
-			.filter(u -> refreshToken.equals(u.getRefreshToken()))
-			.findFirst()
-			.orElse(null);
-
-		if (user == null) {
-			return new ApiResponse<>(401, "Invalid refresh token", null);
-		}
-
-		if (isRefreshTokenExpired(user)) {
-			return new ApiResponse<>(401, "Refresh token expired. Please log in again.",
-				null);
-		}
-
-		String newAccessToken = usernameService.generateToken(user);
-		String newRefreshToken = UUID.randomUUID().toString();
-		user.setRefreshToken(newRefreshToken);
-		user.setRefreshTokenExpiry(LocalDateTime.now().plusDays(7));
-		userRepo.save(user);
-
-		return new ApiResponse<>(200, "New tokens issued",
-			new RefreshTokenResponse(newAccessToken, newRefreshToken));
+		return userRepo.existsByUsername(username.trim());
 	}
 
 }

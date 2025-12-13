@@ -3,10 +3,7 @@ package org.vitalup.vitalup.controller.Auth;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.vitalup.vitalup.dto.ApiResponse;
 import org.vitalup.vitalup.dto.Auth.ForgotPassword.EmailRequest;
 import org.vitalup.vitalup.dto.Auth.ForgotPassword.ForgotPasswordRespond;
@@ -20,6 +17,7 @@ import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendOtpDTO;
 import org.vitalup.vitalup.dto.Auth.ResetPassword.ResetPasswordRequest;
 import org.vitalup.vitalup.dto.Auth.Token.RefreshTokenRequest;
 import org.vitalup.vitalup.dto.Auth.Token.RefreshTokenResponse;
+import org.vitalup.vitalup.dto.Auth.Username.UsernameAvailability;
 import org.vitalup.vitalup.service.Interface.AuthInterface;
 
 @RestController
@@ -83,9 +81,15 @@ public class AuthController {
 	@PostMapping("/refresh-token")
 	public ResponseEntity<ApiResponse<RefreshTokenResponse>> refreshToken(
 		@RequestBody RefreshTokenRequest request) {
-
 		ApiResponse<RefreshTokenResponse> response = authService.refreshAccessToken(request);
 		return ResponseEntity.status(response.getStatus()).body(response);
+	}
+
+	@GetMapping("/check-username")
+	public ResponseEntity<ApiResponse<UsernameAvailability>> checkUsername(@RequestParam String username) {
+		ApiResponse<UsernameAvailability> response = authService.checkUsername(username);
+		return ResponseEntity.status(response.getStatus()).body(response);
+
 	}
 
 }

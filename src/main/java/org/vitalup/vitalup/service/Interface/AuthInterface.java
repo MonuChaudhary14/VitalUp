@@ -12,6 +12,7 @@ import org.vitalup.vitalup.dto.Auth.ResendOtp.ResendOtpDTO;
 import org.vitalup.vitalup.dto.Auth.ResetPassword.ResetPasswordRequest;
 import org.vitalup.vitalup.dto.Auth.Token.RefreshTokenRequest;
 import org.vitalup.vitalup.dto.Auth.Token.RefreshTokenResponse;
+import org.vitalup.vitalup.dto.Auth.Username.UsernameAvailability;
 
 public interface AuthInterface {
 
@@ -34,4 +35,7 @@ public interface AuthInterface {
     ApiResponse<String> registerOrLoginWithGoogle(String email, String username, String googleId);
 
     ApiResponse<RefreshTokenResponse> refreshAccessToken(RefreshTokenRequest request);
+
+    ApiResponse<UsernameAvailability> checkUsername(String username);
+
 }

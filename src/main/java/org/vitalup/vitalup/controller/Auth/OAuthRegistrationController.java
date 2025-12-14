@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.vitalup.vitalup.dto.ApiResponse;
+import org.vitalup.vitalup.dto.Auth.Google.GoogleLoginRequest;
+import org.vitalup.vitalup.dto.Auth.Token.RefreshTokenResponse;
 import org.vitalup.vitalup.service.Interface.AuthInterface;
 
 import java.util.Map;
@@ -16,13 +18,8 @@ public class OAuthRegistrationController {
 	private final AuthInterface authService;
 
 	@PostMapping("/google")
-	public ResponseEntity<ApiResponse<String>> registerWithGoogle(
-		@RequestBody Map<String, String> payload) {
-		String email = payload.get("email");
-		String username = payload.get("username");
-		String googleId = payload.get("googleId");
-
-		ApiResponse<String> response = authService.registerOrLoginWithGoogle(email, username, googleId);
+	public ResponseEntity<ApiResponse<RefreshTokenResponse>> googleLogin(@RequestBody GoogleLoginRequest request){
+		ApiResponse<RefreshTokenResponse> response = authService.registerOrLoginWithGoogle(request.idToken());
 		return ResponseEntity.status(response.getStatus()).body(response);
 	}
 }

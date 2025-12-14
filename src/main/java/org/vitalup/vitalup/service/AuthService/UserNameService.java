@@ -83,4 +83,18 @@ public class UserNameService {
 			.compact();
 	}
 
+	public String generateRefreshToken(Users user){
+		long nowMillis = System.currentTimeMillis();
+		long expMillis = nowMillis + 1000L * 60 * 60 * 24 * 7;
+
+		return Jwts.builder()
+				.claim("sub", user.getUsername())
+				.claim("type", "refresh")
+				.claim("iat", nowMillis / 1000L)
+				.claim("exp", expMillis / 1000L)
+				.signWith(getSigningKey())
+				.compact();
+	}
+
+
 }

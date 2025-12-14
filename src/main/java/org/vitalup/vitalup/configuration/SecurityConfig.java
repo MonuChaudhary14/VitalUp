@@ -52,48 +52,23 @@ public class SecurityConfig {
   }
 
   @Bean
-  @Order(1)
   public SecurityFilterChain apiSecurity(HttpSecurity http) {
     http
-      .securityMatcher("/api/**")
-      .cors(withDefaults())
-      .csrf(AbstractHttpConfigurer::disable)
-      .authorizeHttpRequests(auth -> auth
-        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-        .requestMatchers("/api/v1/auth/**").permitAll()
-        .anyRequest().authenticated()
-      )
-      .sessionManagement(session ->
-        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-      )
-      .authenticationProvider(authenticationProvider)
-      .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
-      .formLogin(AbstractHttpConfigurer::disable)
-      .httpBasic(AbstractHttpConfigurer::disable)
-      .oauth2Login(AbstractHttpConfigurer::disable);
+            .cors(withDefaults())
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(s ->
+                    s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers("/api/v1/auth/**").permitAll()
+                    .anyRequest().authenticated())
+            .authenticationProvider(authenticationProvider)
+            .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+            .formLogin(AbstractHttpConfigurer::disable)
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .oauth2Login(AbstractHttpConfigurer::disable);
 
     return http.build();
   }
 
-  @Bean
-  @Order(2)
-  public SecurityFilterChain webSecurity(HttpSecurity http) {
-    http
-      .securityMatcher("/", "/login**", "/oauth2/**", "/dashboard", "/api/user/info")
-      .authorizeHttpRequests(auth -> auth
-        .requestMatchers("/", "/login**", "/oauth2/**").permitAll()
-        .anyRequest().authenticated()
-      )
-      .csrf(AbstractHttpConfigurer::disable)
-      .formLogin(AbstractHttpConfigurer::disable)
-      .sessionManagement(session ->
-        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-      )
-      .oauth2Login(oauth -> oauth
-        .loginPage("/login")
-        .defaultSuccessUrl("/dashboard", true)
-      );
-
-    return http.build();
-  }
 }

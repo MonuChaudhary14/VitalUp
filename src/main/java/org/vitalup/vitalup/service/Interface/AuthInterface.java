@@ -32,7 +32,7 @@ public interface AuthInterface {
 
     ApiResponse<String> resetPassword(ResetPasswordRequest request);
 
-    ApiResponse<String> registerOrLoginWithGoogle(String email, String username, String googleId);
+    ApiResponse<RefreshTokenResponse> registerOrLoginWithGoogle(String idToken);
 
     ApiResponse<RefreshTokenResponse> refreshAccessToken(RefreshTokenRequest request);
 

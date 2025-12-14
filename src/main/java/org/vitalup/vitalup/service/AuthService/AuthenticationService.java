@@ -23,8 +23,12 @@ import org.vitalup.vitalup.repository.Auth.userRepository;
 import org.vitalup.vitalup.security.EmailValidator;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.vitalup.vitalup.security.UsernameValidator;
+import org.vitalup.vitalup.security.oauth.GoogleTokenVerifier;
 import org.vitalup.vitalup.service.Interface.AuthInterface;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -40,6 +44,7 @@ public class AuthenticationService implements AuthInterface {
 	private final PasswordEncoder passwordEncoder;
 	private final UserNameService usernameService;
 	private final RedisService redisService;
+	private final GoogleTokenVerifier googleVerifier;
 	private static final int TEMP_TOKEN_EXPIRE = 300;
 
 	public ApiResponse<LoginResponseDTO> login(LoginDTO request) {
@@ -400,27 +405,37 @@ public class AuthenticationService implements AuthInterface {
 			null);
 	}
 
-	public ApiResponse<String> registerOrLoginWithGoogle(String email, String username,String googleId) {
-		if (email == null || googleId == null) {
-			return new ApiResponse<>(400, "Invalid Google user data", null);
-		}
+	@Override
+	@Transactional
+	public ApiResponse<RefreshTokenResponse> registerOrLoginWithGoogle(String idToken) {
+
+		Jwt googleJwt = googleVerifier.verify(idToken);
+
+		String email = googleJwt.getClaim("email");
+		String googleId = googleJwt.getSubject();
+		String name = googleJwt.getClaim("name");
 
 		Users user = userRepo.findByEmail(email).orElse(null);
 
 		if (user == null) {
 			user = new Users();
 			user.setEmail(email);
-			user.setUsername(username != null ? username : email.split("@")[0]);
+			user.setUsername(generateUniqueUsername(name, email));
+			user.setGoogleId(googleId);
+			user.setUserRole(UserRole.USER);
 			user.setEnabled(true);
 			user.setLocked(false);
-			user.setUserRole(UserRole.USER);
-			user.setGoogleId(googleId);
 			userRepo.save(user);
 		}
 
-		String jwt = usernameService.generateToken(user);
+		String accessToken = usernameService.generateToken(user);
+		String refreshToken = usernameService.generateRefreshToken(user);
 
-		return new ApiResponse<>(200, "Logged in with Google successfully", jwt);
+		user.setRefreshToken(passwordEncoder.encode(refreshToken));
+		user.setRefreshTokenExpiry(LocalDateTime.now().plusDays(7));
+		userRepo.save(user);
+
+		return new ApiResponse<>(200, "Logged in with Google successfully", new RefreshTokenResponse(accessToken, refreshToken));
 	}
 
 	public ApiResponse<RefreshTokenResponse> refreshAccessToken(RefreshTokenRequest request) {
@@ -537,5 +552,29 @@ public class AuthenticationService implements AuthInterface {
 		}
 		return userRepo.existsByUsername(username.trim());
 	}
+
+	private String normalizeName(String name){
+		return name.toLowerCase().replaceAll("[^a-z0-9]", "");
+	}
+
+	private String randomSuffix(){
+		return String.valueOf(1000 + new SecureRandom().nextInt(9000));
+	}
+
+	private String generateUniqueUsername(String name, String email){
+
+		String base = (name != null && !name.isBlank()) ? normalizeName(name) : email.split("@")[0];
+
+		SecureRandom random = new SecureRandom();
+		String username;
+
+		do{
+			username = base + "_" + (1000 + random.nextInt(9000));
+		} while (userRepo.existsByUsername(username));
+
+		return username;
+	}
+
+
 
 }

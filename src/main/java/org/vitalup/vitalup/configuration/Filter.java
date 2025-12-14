@@ -31,6 +31,13 @@ public class Filter extends OncePerRequestFilter {
   }
 
   @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+
+    String path = request.getRequestURI();
+    return path.startsWith("/api/v1/auth/") || "OPTIONS".equalsIgnoreCase(request.getMethod());
+  }
+
+  @Override
   protected void doFilterInternal(@Nonnull HttpServletRequest request,
                                   @Nonnull HttpServletResponse response,
                                   @Nonnull FilterChain filterChain)

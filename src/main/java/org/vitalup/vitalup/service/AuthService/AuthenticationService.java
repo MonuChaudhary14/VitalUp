@@ -413,7 +413,7 @@ public class AuthenticationService implements AuthInterface {
 
 		String email = googleJwt.getClaim("email");
 		String googleId = googleJwt.getSubject();
-		String name = googleJwt.getClaim("name");
+		String name = googleJwt .getClaim("name");
 
 		Users user = userRepo.findByEmail(email).orElse(null);
 
@@ -431,7 +431,7 @@ public class AuthenticationService implements AuthInterface {
 		String accessToken = usernameService.generateToken(user);
 		String refreshToken = usernameService.generateRefreshToken(user);
 
-		user.setRefreshToken(passwordEncoder.encode(refreshToken));
+		user.setRefreshToken(refreshToken);
 		user.setRefreshTokenExpiry(LocalDateTime.now().plusDays(7));
 		userRepo.save(user);
 

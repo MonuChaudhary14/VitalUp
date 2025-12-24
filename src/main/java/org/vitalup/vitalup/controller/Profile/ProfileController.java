@@ -10,11 +10,14 @@ import org.vitalup.vitalup.dto.Profile.BasicDetailsDTO;
 import org.vitalup.vitalup.service.Interface.ProfileInterface;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/v1/profile")
 public class ProfileController {
 
     private final ProfileInterface profileService;
+
+    public ProfileController(ProfileInterface profileService){
+        this.profileService = profileService;
+    }
 
     @PostMapping("/basicProfile")
     public ResponseEntity<ApiResponse<?>> basicProfileUpdate(BasicDetailsDTO request){

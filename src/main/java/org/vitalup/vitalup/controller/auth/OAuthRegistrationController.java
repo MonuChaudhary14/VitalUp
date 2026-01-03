@@ -1,4 +1,4 @@
-package org.vitalup.vitalup.controller.Auth;
+package org.vitalup.vitalup.controller.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -7,8 +7,6 @@ import org.vitalup.vitalup.dto.ApiResponse;
 import org.vitalup.vitalup.dto.Auth.Google.GoogleLoginRequest;
 import org.vitalup.vitalup.dto.Auth.Token.RefreshTokenResponse;
 import org.vitalup.vitalup.service.Interface.AuthInterface;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")

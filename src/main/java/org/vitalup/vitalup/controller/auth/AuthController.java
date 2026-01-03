@@ -1,4 +1,4 @@
-package org.vitalup.vitalup.controller.Auth;
+package org.vitalup.vitalup.controller.auth;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

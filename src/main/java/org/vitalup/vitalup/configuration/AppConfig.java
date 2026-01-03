@@ -1,5 +1,6 @@
 package org.vitalup.vitalup.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.client.RestClient;
 
 @Configuration
 public class AppConfig {
@@ -48,4 +50,13 @@ public class AppConfig {
     return new BCryptPasswordEncoder();
   }
 
+  @Bean
+  public RestClient restClient() {
+    return RestClient.create();
+  }
+
+  @Bean
+  public ObjectMapper objectMapper() {
+    return new ObjectMapper();
+  }
 }

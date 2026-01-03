@@ -1,4 +1,4 @@
-package org.vitalup.vitalup.service.AuthService;
+package org.vitalup.vitalup.service.auth;
 
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;

@@ -13,8 +13,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.vitalup.vitalup.entities.Auth.Users;
-import org.vitalup.vitalup.service.AuthService.UserNameService;
-import org.vitalup.vitalup.service.AuthService.UserService;
+import org.vitalup.vitalup.service.auth.UserNameService;
+import org.vitalup.vitalup.service.auth.UserService;
 
 import java.io.IOException;
 import java.util.function.Function;

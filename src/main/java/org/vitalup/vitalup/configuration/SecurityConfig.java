@@ -61,6 +61,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers("/api/v1/auth/**").permitAll()
+                    .requestMatchers("/api/v1/food-scan/**").permitAll()
                     .anyRequest().authenticated())
             .authenticationProvider(authenticationProvider)
             .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)

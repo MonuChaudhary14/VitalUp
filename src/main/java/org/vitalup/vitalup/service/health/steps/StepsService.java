@@ -1,11 +1,11 @@
-package org.vitalup.vitalup.service.health.waterIntake;
+package org.vitalup.vitalup.service.health.steps;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.vitalup.vitalup.dto.ApiResponse;
 import org.vitalup.vitalup.dto.health.steps.AddStepsRequestDTO;
 import org.vitalup.vitalup.entities.Auth.Users;
-import org.vitalup.vitalup.entities.health.StepsActivity;
+import org.vitalup.vitalup.entities.health.steps.StepsActivity;
 import org.vitalup.vitalup.repository.health.steps.StepsRepository;
 import org.vitalup.vitalup.features.steps.dto.StepsResponseDTO;
 import org.vitalup.vitalup.service.Interface.Health.StepsInterface;

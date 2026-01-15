@@ -6,7 +6,7 @@ import org.vitalup.vitalup.dto.ApiResponse;
 import org.vitalup.vitalup.dto.health.waterIntake.AddWaterRequestDTO;
 import org.vitalup.vitalup.dto.health.waterIntake.WaterIntakeResponseDTO;
 import org.vitalup.vitalup.entities.Auth.Users;
-import org.vitalup.vitalup.entities.health.WaterIntake;
+import org.vitalup.vitalup.entities.health.waterIntake.WaterIntake;
 import org.vitalup.vitalup.repository.health.waterIntake.WaterIntakeRepository;
 import org.vitalup.vitalup.service.Interface.Health.WaterIntakeInterface;
 

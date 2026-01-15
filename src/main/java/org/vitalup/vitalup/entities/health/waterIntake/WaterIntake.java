@@ -1,4 +1,4 @@
-package org.vitalup.vitalup.entities.health;
+package org.vitalup.vitalup.entities.health.waterIntake;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -10,24 +10,23 @@ import java.util.UUID;
 
 @Entity
 @Table(
-        name = "steps_activity",
+        name = "water_intake",
         uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "date"})
 )
 @Data
 @NoArgsConstructor
-public class StepsActivity {
+public class WaterIntake {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional= false)
     @JoinColumn(name = "user_id")
     private Users user;
-
     private LocalDate date;
-    private int steps;
-    private double distanceKm;
-    private String activityLevel;
+    private int consumedMl;
+
+    private int dailyGoalMl = 3000;
 
 }

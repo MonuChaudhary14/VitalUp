@@ -2,7 +2,7 @@ package org.vitalup.vitalup.repository.health.steps;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.vitalup.vitalup.entities.Auth.Users;
-import org.vitalup.vitalup.entities.health.StepsActivity;
+import org.vitalup.vitalup.entities.health.steps.StepsActivity;
 
 
 import java.time.LocalDate;

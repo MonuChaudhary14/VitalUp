@@ -1,4 +1,4 @@
-package org.vitalup.vitalup.controller.Health;
+package org.vitalup.vitalup.controller.Health.waterIntake;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -6,8 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.vitalup.vitalup.dto.ApiResponse;
-import org.vitalup.vitalup.dto.health.AddWaterRequestDTO;
-import org.vitalup.vitalup.dto.health.WaterIntakeResponseDTO;
+import org.vitalup.vitalup.dto.health.waterIntake.AddWaterRequestDTO;
+import org.vitalup.vitalup.dto.health.waterIntake.WaterIntakeResponseDTO;
 import org.vitalup.vitalup.entities.Auth.Users;
 import org.vitalup.vitalup.service.Interface.Health.WaterIntakeInterface;
 

@@ -1,13 +1,13 @@
-package org.vitalup.vitalup.service.health;
+package org.vitalup.vitalup.service.health.waterIntake;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.vitalup.vitalup.dto.ApiResponse;
-import org.vitalup.vitalup.dto.health.AddWaterRequestDTO;
-import org.vitalup.vitalup.dto.health.WaterIntakeResponseDTO;
+import org.vitalup.vitalup.dto.health.waterIntake.AddWaterRequestDTO;
+import org.vitalup.vitalup.dto.health.waterIntake.WaterIntakeResponseDTO;
 import org.vitalup.vitalup.entities.Auth.Users;
 import org.vitalup.vitalup.entities.health.WaterIntake;
-import org.vitalup.vitalup.repository.health.WaterIntakeRepository;
+import org.vitalup.vitalup.repository.health.waterIntake.WaterIntakeRepository;
 import org.vitalup.vitalup.service.Interface.Health.WaterIntakeInterface;
 
 import java.time.LocalDate;

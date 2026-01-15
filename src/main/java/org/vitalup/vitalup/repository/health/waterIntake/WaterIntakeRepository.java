@@ -1,4 +1,4 @@
-package org.vitalup.vitalup.repository.health;
+package org.vitalup.vitalup.repository.health.waterIntake;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.vitalup.vitalup.entities.Auth.Users;

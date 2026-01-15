@@ -1,4 +1,4 @@
-package org.vitalup.vitalup.dto.health;
+package org.vitalup.vitalup.dto.health.waterIntake;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

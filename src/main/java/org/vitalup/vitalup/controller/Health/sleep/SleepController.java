@@ -9,14 +9,14 @@ import org.vitalup.vitalup.dto.ApiResponse;
 import org.vitalup.vitalup.dto.health.sleep.AddSleepRequestDTO;
 import org.vitalup.vitalup.dto.health.sleep.SleepResponseDTO;
 import org.vitalup.vitalup.entities.Auth.Users;
-import org.vitalup.vitalup.service.health.sleep.SleepService;
+import org.vitalup.vitalup.service.Interface.Health.SleepInterface;
 
 @RestController
 @RequestMapping("/api/v1/sleep")
 @RequiredArgsConstructor
 public class SleepController {
 
-    private final SleepService sleepService;
+    private final SleepInterface sleepService;
 
     @PostMapping("/add")
     public ResponseEntity<ApiResponse<SleepResponseDTO>> addSleep(@Valid @RequestBody AddSleepRequestDTO request,

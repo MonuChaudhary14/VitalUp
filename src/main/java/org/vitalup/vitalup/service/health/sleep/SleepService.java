@@ -8,13 +8,14 @@ import org.vitalup.vitalup.dto.health.sleep.SleepResponseDTO;
 import org.vitalup.vitalup.entities.Auth.Users;
 import org.vitalup.vitalup.entities.health.sleep.SleepRecord;
 import org.vitalup.vitalup.repository.health.sleep.SleepRepository;
+import org.vitalup.vitalup.service.Interface.Health.SleepInterface;
 
 import java.time.Duration;
 import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
-public class SleepService {
+public class SleepService implements SleepInterface {
 
     private final SleepRepository repository;
 

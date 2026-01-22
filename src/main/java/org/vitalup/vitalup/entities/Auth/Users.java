@@ -21,8 +21,6 @@ import java.util.UUID;
 @EqualsAndHashCode
 public class Users implements UserDetails {
 
-	// Auth
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private UUID id;
@@ -53,8 +51,6 @@ public class Users implements UserDetails {
 	@Column(name = "google_id", unique = true)
 	private String googleId;
 
-	// Security
-
 	@Override
 	public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
 		return Collections.singletonList(new SimpleGrantedAuthority(userRole.name()));
@@ -84,8 +80,6 @@ public class Users implements UserDetails {
 	public boolean isEnabled() {
 		return enabled;
 	}
-
-	// Time Update
 
 	@PrePersist
 	protected void onCreate() {

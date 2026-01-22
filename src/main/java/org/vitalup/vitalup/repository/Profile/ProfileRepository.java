@@ -11,6 +11,4 @@ public interface ProfileRepository extends JpaRepository<UserHealthProfile, UUID
 
     Optional<UserHealthProfile> findByUserId(UUID id);
 
-
-
 }

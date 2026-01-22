@@ -1,6 +1,7 @@
 package org.vitalup.vitalup.service.ProfileService;
 
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.vitalup.vitalup.dto.ApiResponse;
 import org.vitalup.vitalup.dto.Profile.BasicDetailsDTO;
@@ -12,7 +13,9 @@ import org.vitalup.vitalup.security.UsernameValidator;
 import org.vitalup.vitalup.service.Interface.ProfileInterface;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
+@Service
 public class ProfileService implements ProfileInterface {
 
     private final ProfileRepository profileRepository;
@@ -28,15 +31,11 @@ public class ProfileService implements ProfileInterface {
     @Transactional
     public ApiResponse<?> updatebasicDetails(BasicDetailsDTO request){
 
-        // get User details
+        Users user = (Users) Objects.requireNonNull(SecurityContextHolder.getContext()
+					.getAuthentication()).getPrincipal();
 
-        Users user = (Users) SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal();
-
-        UserHealthProfile profile = profileRepository.findByUserId(user.getId())
+        UserHealthProfile profile = profileRepository.findByUserId(Objects.requireNonNull(user).getId())
                 .orElseThrow(() -> new RuntimeException("Health profile not found"));
-
-        // Check username
 
         if(request.getUsername() != null && !request.getUsername().isBlank()){
 
@@ -52,8 +51,6 @@ public class ProfileService implements ProfileInterface {
 
             user.setUsername(newUsername);
         }
-
-        // health profile update
 
         if(request.getFullName() != null && !request.getFullName().isBlank()){
             profile.setFullName(request.getFullName().trim());

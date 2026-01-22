@@ -25,36 +25,23 @@ public class UserHealthProfile {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private Users user;
 
-
-    // Profile
-
     private String fullName;
     private LocalDate dateOfBirth;
     private Gender gender;
 
-    // Physical Details
-
     private Double heightCm;
     private Double weightKg;
-
-    // Vital
     private BloodGroup bloodGroup;
     private Integer restingHeartRate;
 
     private Boolean smoker;
     private Boolean alcoholConsumer;
 
-    // Activity Info
-
-    private String activityLevel; // sedentary, moderate, active --> Remember to convert into Enum
-
-    // Emergency Info
+    private String activityLevel;
 
     private String emergencyContactName;
     private String emergencyContactPhone;
     private Boolean organDonor;
-
-    // Time Details
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

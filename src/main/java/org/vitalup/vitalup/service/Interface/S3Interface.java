@@ -15,4 +15,7 @@ public interface S3Interface {
 
     String generateFileKey(String originalFilename);
 
+    InputStream getFileStream(String key);
+
+    String getContentType(String key);
 }

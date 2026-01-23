@@ -13,6 +13,7 @@ target/
 .springBeans
 .sts4-cache
 .env
+firebase-service-account.json
 
 ### IntelliJ IDEA ###
 .idea
@@ -21,6 +22,7 @@ target/
 *.ipr
 .idea/misc.xml
 application.log
+firebase-service-account.json
 
 ### NetBeans ###
 /nbproject/private/
@@ -31,12 +33,15 @@ application.log
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
+firebase-service-account.json
 
 ### VS Code ###
 .vscode/
+firebase-service-account.json
 
 ### macOS ###
 .DS_Store
 /static/
 /templates/
 *.gz
+firebase-service-account.json

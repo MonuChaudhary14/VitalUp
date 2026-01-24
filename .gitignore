@@ -22,7 +22,6 @@ firebase-service-account.json
 *.ipr
 .idea/misc.xml
 application.log
-firebase-service-account.json
 
 ### NetBeans ###
 /nbproject/private/
@@ -33,15 +32,12 @@ firebase-service-account.json
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-firebase-service-account.json
 
 ### VS Code ###
 .vscode/
-firebase-service-account.json
 
 ### macOS ###
 .DS_Store
 /static/
 /templates/
 *.gz
-firebase-service-account.json

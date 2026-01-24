@@ -7,24 +7,19 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 
 @Configuration
 public class FirebaseConfig {
 
     @Value("${app.firebase-configuration-file}")
-    private String firebaseConfigFile;
+    private String firebaseConfigPath;
 
     @PostConstruct
     public void initialize() {
-        try {
-            InputStream serviceAccount =
-              getClass().getClassLoader()
-                .getResourceAsStream(firebaseConfigFile);
-
-            if (serviceAccount == null) {
-                throw new IllegalStateException("Firebase config file not found: " + firebaseConfigFile);
-            }
+        try (InputStream serviceAccount =
+               new FileInputStream(firebaseConfigPath)) {
 
             FirebaseOptions options = FirebaseOptions.builder()
               .setCredentials(GoogleCredentials.fromStream(serviceAccount))
@@ -35,7 +30,9 @@ public class FirebaseConfig {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Firebase initialization failed", e);
+            throw new RuntimeException(
+              "Firebase initialization failed. Path: " + firebaseConfigPath, e
+            );
         }
     }
 }

@@ -5,12 +5,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 import org.vitalup.vitalup.dto.foodScanner.FoodAnalysisResponse;
 import org.vitalup.vitalup.dto.gemini.GeminiRequest;
 import org.vitalup.vitalup.dto.gemini.GeminiResponse;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Base64;
 import java.util.List;
@@ -103,17 +105,22 @@ public class GeminiFoodScannerService {
 			result.getNutrition().setEstimated(true);
 			return result;
 
-		} catch (Exception e) {
-			throw new RuntimeException("Food scan failed", e);
+		} catch (HttpClientErrorException.TooManyRequests e) {
+			throw new RuntimeException(
+				"Gemini quota exceeded. Please try again later."
+			);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
 	private String extractPureJson(String text) {
+		String cleaned = text.replaceAll("```json", "").replaceAll("```", "");
 		int start = text.indexOf("{");
 		int end = text.lastIndexOf("}");
 		if (start == -1 || end == -1) {
 			throw new RuntimeException("Invalid JSON format");
 		}
-		return text.substring(start, end + 1);
+		return cleaned.substring(start, end + 1).trim();
 	}
 }

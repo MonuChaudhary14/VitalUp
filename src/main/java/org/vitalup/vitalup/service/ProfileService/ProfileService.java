@@ -34,8 +34,13 @@ public class ProfileService implements ProfileInterface {
         Users user = (Users) Objects.requireNonNull(SecurityContextHolder.getContext()
 					.getAuthentication()).getPrincipal();
 
-        UserHealthProfile profile = profileRepository.findByUserId(Objects.requireNonNull(user).getId())
-                .orElseThrow(() -> new RuntimeException("Health profile not found"));
+        UserHealthProfile profile = profileRepository
+          .findByUserId(Objects.requireNonNull(user).getId())
+          .orElseGet(() -> {
+              UserHealthProfile newProfile = new UserHealthProfile();
+              newProfile.setUser(user);
+              return profileRepository.save(newProfile);
+          });
 
         if(request.getUsername() != null && !request.getUsername().isBlank()){
 

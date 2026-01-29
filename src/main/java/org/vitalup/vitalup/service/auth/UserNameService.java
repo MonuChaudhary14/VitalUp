@@ -38,22 +38,21 @@ public class UserNameService {
 		}
 
 		return Jwts.builder()
-			.claim("sub", userDetails.getUsername())
+			.subject(userDetails.getUsername())
 			.claim("passwordVersion", passwordVersion)
-			.claim("iat", nowMillis / 1000L)
-			.claim("exp", expMillis / 1000L)
+			.issuedAt(new Date(nowMillis))
+			.expiration(new Date(expMillis))
 			.signWith(getSigningKey())
 			.compact();
-
 	}
 
-	public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+	public <T> T extractClaim(String token, Function<Claims, T> resolver) {
 		Claims claims = Jwts.parser()
 			.verifyWith(getSigningKey())
 			.build()
 			.parseSignedClaims(token)
 			.getPayload();
-		return claimsResolver.apply(claims);
+		return resolver.apply(claims);
 	}
 
 	public String extractUsername(String token) {
@@ -62,7 +61,9 @@ public class UserNameService {
 
 	public boolean validToken(String token, UserDetails userDetails) {
 		final String username = extractUsername(token);
-		return username != null && username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+		return username != null &&
+			username.equals(userDetails.getUsername()) &&
+			!isTokenExpired(token);
 	}
 
 	private boolean isTokenExpired(String token) {
@@ -75,25 +76,25 @@ public class UserNameService {
 		long expMillis = nowMillis + 1000L * 60 * 5;
 
 		return Jwts.builder()
-			.claim("sub", email)
+			.subject(email)
 			.claim("purpose", "registration_session")
-			.claim("iat", nowMillis / 1000L)
-			.claim("exp", expMillis / 1000L)
+			.issuedAt(new Date(nowMillis))
+			.expiration(new Date(expMillis))
 			.signWith(getSigningKey())
 			.compact();
 	}
 
-	public String generateRefreshToken(Users user){
+	public String generateRefreshToken(Users user) {
 		long nowMillis = System.currentTimeMillis();
 		long expMillis = nowMillis + 1000L * 60 * 60 * 24 * 7;
 
 		return Jwts.builder()
-				.claim("sub", user.getUsername())
-				.claim("type", "refresh")
-				.claim("iat", nowMillis / 1000L)
-				.claim("exp", expMillis / 1000L)
-				.signWith(getSigningKey())
-				.compact();
+			.subject(user.getUsername())
+			.claim("type", "refresh")
+			.issuedAt(new Date(nowMillis))
+			.expiration(new Date(expMillis))
+			.signWith(getSigningKey())
+			.compact();
 	}
 
 }

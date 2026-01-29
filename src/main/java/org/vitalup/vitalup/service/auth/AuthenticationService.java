@@ -19,7 +19,9 @@ import org.vitalup.vitalup.dto.Auth.Username.UsernameAvailability;
 import org.vitalup.vitalup.entities.Auth.UserRole;
 import org.vitalup.vitalup.entities.Auth.Users;
 import org.vitalup.vitalup.entities.OTP.OtpType;
+import org.vitalup.vitalup.entities.Profile.UserHealthProfile;
 import org.vitalup.vitalup.repository.Auth.userRepository;
+import org.vitalup.vitalup.repository.Profile.ProfileRepository;
 import org.vitalup.vitalup.security.EmailValidator;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.vitalup.vitalup.security.UsernameValidator;
@@ -45,12 +47,13 @@ public class AuthenticationService implements AuthInterface {
 	private final UserNameService usernameService;
 	private final RedisService redisService;
 	private final GoogleTokenVerifier googleVerifier;
+	private final ProfileRepository profileRepository;
 	private static final int TEMP_TOKEN_EXPIRE = 300;
 
 	public ApiResponse<LoginResponseDTO> login(LoginDTO request) {
 
 		if (request == null || request.getUsername() == null || request.getPassword() == null) {
-			return new ApiResponse<>(400, "PLease check all the fields", null);
+			return new ApiResponse<>(400, "Please check all the fields", null);
 		}
 
 		String rawUsername = request.getUsername();
@@ -196,6 +199,9 @@ public class AuthenticationService implements AuthInterface {
 
 			Users newUser = buildUserFromRequest(tempRequest);
 			userRepo.save(newUser);
+			UserHealthProfile profile = new UserHealthProfile();
+			profile.setUser(newUser);
+			profileRepository.save(profile);
 
 			otpService.deleteTempOtp(email);
 			otpService.deleteOTP(email, OtpType.REGISTRATION);
@@ -426,6 +432,9 @@ public class AuthenticationService implements AuthInterface {
 			user.setEnabled(true);
 			user.setLocked(false);
 			userRepo.save(user);
+			UserHealthProfile profile = new UserHealthProfile();
+			profile.setUser(user);
+			profileRepository.save(profile);
 		}
 
 		String accessToken = usernameService.generateToken(user);
@@ -557,10 +566,6 @@ public class AuthenticationService implements AuthInterface {
 		return name.toLowerCase().replaceAll("[^a-z0-9]", "");
 	}
 
-	private String randomSuffix(){
-		return String.valueOf(1000 + new SecureRandom().nextInt(9000));
-	}
-
 	private String generateUniqueUsername(String name, String email){
 
 		String base = (name != null && !name.isBlank()) ? normalizeName(name) : email.split("@")[0];
@@ -574,7 +579,5 @@ public class AuthenticationService implements AuthInterface {
 
 		return username;
 	}
-
-
 
 }

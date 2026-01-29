@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -58,17 +58,29 @@ public class Filter extends OncePerRequestFilter {
     }
 
     if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-      UserDetails userDetails = userService.loadUserByUsername(userName);
-      Users user = (Users) userDetails;
+      Users user;
+
+      try {
+        if (userName.contains("@")) {
+          user = userService.loadUserByEmail(userName);
+        } else {
+          user = (Users) userService.loadUserByUsername(userName);
+        }
+      } catch (UsernameNotFoundException e) {
+        filterChain.doFilter(request, response);
+        return;
+      }
 
       Claims claims = usernameService.extractClaim(token, Function.identity());
-      Integer tokenVersion = (Integer) claims.get("passwordVersion");
+      Number version = claims.get("passwordVersion", Number.class);
+      int tokenVersion = version != null ? version.intValue() : -1;
 
       if (usernameService.validToken(token, user) && tokenVersion == user.getPasswordVersion()) {
         UsernamePasswordAuthenticationToken authToken =
           new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
+        System.out.println("Auth set for: " + user.getUsername());
       }
     }
 

@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.vitalup.vitalup.entities.Auth.Users;
 import org.vitalup.vitalup.repository.Auth.userRepository;
 import org.vitalup.vitalup.security.UsernameValidator;
 
@@ -25,5 +26,11 @@ public class UserService implements UserDetailsService {
 				new UsernameNotFoundException("User not found"));
 		}
 		throw new UsernameNotFoundException("Invalid username:" + username);
+	}
+
+	public Users loadUserByEmail(String email) {
+		return userRepo.findByEmail(email)
+			.orElseThrow(() ->
+				new UsernameNotFoundException("Invalid email: " + email));
 	}
 }

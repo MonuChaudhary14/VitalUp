@@ -2,6 +2,7 @@ package org.vitalup.vitalup.controller.Profile;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.vitalup.vitalup.dto.ApiResponse;
@@ -19,7 +20,7 @@ public class ProfileController {
     }
 
     @PostMapping("/basicProfile")
-    public ResponseEntity<ApiResponse<?>> basicProfileUpdate(BasicDetailsDTO request){
+    public ResponseEntity<ApiResponse<?>> basicProfileUpdate(@RequestBody BasicDetailsDTO request){
         ApiResponse<?> response = profileService.updatebasicDetails(request);
         return ResponseEntity.status(response.getStatus()).body(response);
     }

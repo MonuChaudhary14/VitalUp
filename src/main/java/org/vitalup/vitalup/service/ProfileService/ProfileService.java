@@ -111,8 +111,8 @@ public class ProfileService implements ProfileInterface {
             profile.setAlcoholConsumer(request.getAlcoholConsumer());
         }
 
-        if(request.getActivityLevel() != null && !request.getActivityLevel().isBlank()){
-            profile.setActivityLevel(request.getActivityLevel().trim().toLowerCase());
+        if(request.getActivityLevel() != null){
+            profile.setActivityLevel(request.getActivityLevel());
         }
 
         if(request.getEmergencyContactName() != null && !request.getEmergencyContactName().isBlank()){
